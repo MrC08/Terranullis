@@ -1,0 +1,99 @@
+[gd_scene load_steps=17 format=3 uid="uid://cs5hhep0lin7l"]
+
+[ext_resource type="Script" uid="uid://cajiepfijw2j0" path="res://cs/World.cs" id="1_sugp2"]
+[ext_resource type="PackedScene" uid="uid://dwuwtf8io6h4p" path="res://scenes/player.tscn" id="2_0xm2m"]
+[ext_resource type="Script" uid="uid://mvfk5tclye52" path="res://cs/SkyManager.cs" id="2_jyhfs"]
+[ext_resource type="Shader" uid="uid://qc755l8ef71q" path="res://res/post.gdshader" id="3_sugp2"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_0wfyh"]
+frequency = 0.05
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_sugp2"]
+frequency = 0.0125
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_jyhfs"]
+frequency = 0.0063
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_tbgi4"]
+frequency = 0.0032
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0xm2m"]
+sky_top_color = Color(0.33709857, 0.40959236, 0.52784693, 1)
+sky_horizon_color = Color(0.79950243, 0.6225501, 0.5537148, 1)
+sky_curve = 0.1
+ground_bottom_color = Color(0.61637056, 0.41457954, 0.4808395, 1)
+ground_horizon_color = Color(0.79950243, 0.6225501, 0.5537148, 1)
+sun_angle_max = 25.0
+use_debanding = false
+
+[sub_resource type="Sky" id="Sky_h2yge"]
+sky_material = SubResource("ProceduralSkyMaterial_0xm2m")
+
+[sub_resource type="Environment" id="Environment_1bvp3"]
+background_mode = 2
+sky = SubResource("Sky_h2yge")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="Gradient" id="Gradient_jyhfs"]
+colors = PackedColorArray(0.38431373, 0.45490196, 0.54901963, 1, 0.27, 0.34800002, 0.45, 1)
+
+[sub_resource type="Gradient" id="Gradient_tbgi4"]
+colors = PackedColorArray(0.64705884, 0.654902, 0.67058825, 1, 0.54, 0.56, 0.6, 1)
+
+[sub_resource type="Gradient" id="Gradient_tefeu"]
+colors = PackedColorArray(0.42352942, 0.47843137, 0.5882353, 1, 0.56, 0.6066667, 0.7, 1)
+
+[sub_resource type="Gradient" id="Gradient_o6xl0"]
+offsets = PackedFloat32Array(0, 0.056962024)
+colors = PackedColorArray(1, 1, 1, 1, 0.07806667, 0.053, 0.1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jyhfs"]
+shader = ExtResource("3_sugp2")
+
+[node name="Node3D" type="Node3D"]
+
+[node name="World" type="Node3D" parent="."]
+script = ExtResource("1_sugp2")
+noiseArray = Array[Noise]([SubResource("FastNoiseLite_0wfyh"), SubResource("FastNoiseLite_sugp2"), SubResource("FastNoiseLite_jyhfs"), SubResource("FastNoiseLite_tbgi4")])
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
+environment = SubResource("Environment_1bvp3")
+script = ExtResource("2_jyhfs")
+zenithColorGradient = SubResource("Gradient_jyhfs")
+horizonColorGradient = SubResource("Gradient_tbgi4")
+nadirColorGradient = SubResource("Gradient_tefeu")
+zenithDuskColor = Color(0.275, 0.35000002, 0.5, 1)
+horizonDuskColor = Color(1, 0.58, 0.39999998, 1)
+nadirDuskColor = Color(0.87, 0.3306, 0.33958986, 1)
+nightGradient = SubResource("Gradient_o6xl0")
+
+[node name="Sun" type="DirectionalLight3D" parent="World/WorldEnvironment"]
+transform = Transform3D(-3.5608178e-08, -0.16590779, 0.98614126, 2.535221e-08, 0.98614126, 0.16590779, -1, 3.090853e-08, -3.0908556e-08, 0, 0, 0)
+light_specular = 16.0
+shadow_enabled = true
+shadow_bias = 0.05
+shadow_blur = 4.0
+directional_shadow_mode = 1
+directional_shadow_split_1 = 0.3
+directional_shadow_split_2 = 1.0
+directional_shadow_split_3 = 1.0
+directional_shadow_blend_splits = true
+directional_shadow_max_distance = 300.0
+
+[node name="ChunkManager" type="Node3D" parent="World"]
+
+[node name="LODManager" type="Node3D" parent="World"]
+
+[node name="Player" parent="World" instance=ExtResource("2_0xm2m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 16, 2)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+material = SubResource("ShaderMaterial_jyhfs")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

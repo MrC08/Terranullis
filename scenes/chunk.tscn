@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://dff5e8lahpq3p"]
+
+[ext_resource type="Script" uid="uid://b78v68ttp4klb" path="res://cs/Chunk.cs" id="1_jas4a"]
+[ext_resource type="Material" uid="uid://cj5hetu4b3cgt" path="res://res/terrain_material.tres" id="2_jtw3q"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_kdh3y"]
+
+[node name="Chunk" type="Node3D"]
+script = ExtResource("1_jas4a")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = ExtResource("2_jtw3q")
+mesh = SubResource("ArrayMesh_kdh3y")
+
+[node name="RigidBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]

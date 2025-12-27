@@ -1,0 +1,15 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://cj5hetu4b3cgt"]
+
+[ext_resource type="Shader" uid="uid://b6bbrtfd1stgj" path="res://res/terrain_shader.gdshader" id="1_d8too"]
+[ext_resource type="Texture2D" uid="uid://dwxenp1hbhjaw" path="res://res/tilemap.png" id="2_0y5cw"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_d8too")
+shader_parameter/texture_albedo = ExtResource("2_0y5cw")
+shader_parameter/alpha_scissor_threshold = 0.5
+shader_parameter/roughness = 1.0
+shader_parameter/metallic_texture_channel = Vector4(1, 0, 0, 0)
+shader_parameter/specular = 0.1
+shader_parameter/metallic = 0.0
+shader_parameter/sky_color = Color(0.64705884, 1, 1, 1)
