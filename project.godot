@@ -16,11 +16,6 @@ config/features=PackedStringArray("4.5", "C#", "Forward Plus")
 run/max_fps=200
 config/icon="res://icon.svg"
 
-[autoload]
-
-Const="*res://gdscript/const.gd"
-Util="*res://cs/Util.cs"
-
 [display]
 
 window/vsync/vsync_mode=0

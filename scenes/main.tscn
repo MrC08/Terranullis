@@ -73,7 +73,6 @@ transform = Transform3D(-3.5608178e-08, -0.16590779, 0.98614126, 2.535221e-08, 0
 light_specular = 16.0
 shadow_enabled = true
 shadow_bias = 0.05
-shadow_blur = 4.0
 directional_shadow_mode = 1
 directional_shadow_split_1 = 0.3
 directional_shadow_split_2 = 1.0
