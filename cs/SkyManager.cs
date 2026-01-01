@@ -34,7 +34,7 @@ public partial class SkyManager : WorldEnvironment
 			playerPos = player.GlobalPosition;
 
 			//sun.RotateX((float) delta / 10);
-			sun.Rotation = sun.Rotation + new Vector3((float) delta * 0.004363323f * 10f, 0, 0);
+			sun.Rotation = sun.Rotation + new Vector3((float) delta * 0.004363323f * 1f, 0, 0);
 		}
 
 		if (sun.Rotation.X > Math.PI)
@@ -50,7 +50,7 @@ public partial class SkyManager : WorldEnvironment
 
 		if (solarAltitude > 0) {
 			sun.LightEnergy = Math.Max(0, 1 - solarAltitude / 5);
-			((ProceduralSkyMaterial) Environment.Sky.SkyMaterial).SunAngleMax = Math.Max(0, 25 - solarAltitude * 18);
+			((ShaderMaterial) Environment.Sky.SkyMaterial).SetShaderParameter("sun_angle_max", Math.Max(0, 25 - solarAltitude * 18));
 
 			float nightFactor = MathF.Min(1, solarAltitude / 360f);
 			zenith *= nightGradient.Sample(nightFactor);
@@ -60,7 +60,7 @@ public partial class SkyManager : WorldEnvironment
 			sunsetFactor = (float) Math.Pow(sunsetFactor, Math.Max(1, solarAltitude / 20f));
 		} else {
 			sun.LightEnergy = 1;
-			((ProceduralSkyMaterial) Environment.Sky.SkyMaterial).SunAngleMax = 25;
+			((ShaderMaterial) Environment.Sky.SkyMaterial).SetShaderParameter("sun_angle_max", 25);
 		}
 
 		zenith = zenith.Lerp(zenithDuskColor, sunsetFactor);
@@ -74,11 +74,8 @@ public partial class SkyManager : WorldEnvironment
 			nadir = nadir.Darkened((playerPos.Y - 512f) / 2400f);
 		}
 
-		((ProceduralSkyMaterial) Environment.Sky.SkyMaterial).SkyTopColor = zenith;
-		
-		((ProceduralSkyMaterial) Environment.Sky.SkyMaterial).SkyHorizonColor = horizon;
-		((ProceduralSkyMaterial) Environment.Sky.SkyMaterial).GroundHorizonColor = horizon;
-		
-		((ProceduralSkyMaterial) Environment.Sky.SkyMaterial).GroundBottomColor = nadir;
+		((ShaderMaterial) Environment.Sky.SkyMaterial).SetShaderParameter("sky_zenith_color", zenith);
+		((ShaderMaterial) Environment.Sky.SkyMaterial).SetShaderParameter("sky_horizon_color", horizon);
+		((ShaderMaterial) Environment.Sky.SkyMaterial).SetShaderParameter("sky_nadir_color", nadir);
 	}
 }
