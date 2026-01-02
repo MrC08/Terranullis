@@ -151,7 +151,7 @@ public partial class Chunk : Node3D, ICompilable
 		
 		List<Vector3> vertices = new List<Vector3>();
 		List<Vector3> normals = new List<Vector3>();
-		List<Vector2> tex = new List<Vector2>();
+		List<float> tex = new List<float>();
 		List<int> indices = new List<int>();
 		
 		int index = 0;
@@ -175,6 +175,7 @@ public partial class Chunk : Node3D, ICompilable
 		Face yn = new Face();
 		Face zp = new Face();
 		Face zn = new Face();
+		Face tempFace = new Face();
 
 		for (int yChunk = 0; yChunk < CHUNK_VSIZE / 16; yChunk++) {
 			if (blockData.staticData[yChunk] == 0)
@@ -182,8 +183,8 @@ public partial class Chunk : Node3D, ICompilable
 				continue;
 			}
 
-			for (int x = 0; x < CHUNK_SIZE; x++) {
-				for (int y = yChunk * 16; y < yChunk * 16 + 16; y++) {
+			for (int y = yChunk * 16; y < yChunk * 16 + 16; y++) {
+				for (int x = 0; x < CHUNK_SIZE; x++) {
 					for (int z = 0; z < CHUNK_SIZE; z++) {
 						if (blockData.staticData[yChunk] == 1 && !(
 							x == 0 || x == CHUNK_SIZE - 1 || y % 16 == 0 || y % 16 == CHUNK_SIZE - 1 || z == 0 || z == CHUNK_SIZE - 1
@@ -192,171 +193,94 @@ public partial class Chunk : Node3D, ICompilable
 
 						if (GetBlock(x, y, z, 0) != 0) {
 							if (IsBlockTransparentDuringGeneration(x - 1, y, z)) {
-								vertices.Add(new Vector3(x, y, z));
-								vertices.Add(new Vector3(x, y, z + 1));
-								vertices.Add(new Vector3(x, y + 1, z + 1));
-								vertices.Add(new Vector3(x, y + 1, z));
-
-								float texture = 1;
-								tex.Add(new Vector2(0, (texture + 1) / TEX_SIZE));
-								tex.Add(new Vector2(1, (texture + 1) / TEX_SIZE));
-								tex.Add(new Vector2(1, texture / TEX_SIZE));
-								tex.Add(new Vector2(0, texture / TEX_SIZE));
-								
-								normals.Add(Vector3.Left);
-								normals.Add(Vector3.Left);
-								normals.Add(Vector3.Left);
-								normals.Add(Vector3.Left);
-								
-								indices.Add(index);
-								indices.Add(index + 3);
-								indices.Add(index + 1);
-								indices.Add(index + 1);
-								indices.Add(index + 3);
-								indices.Add(index + 2);
-
-								index += 4;
+								tempFace.Set(new Vector3I(x, y, z), 1, Face.Facing.LEFT);
+								if (!xp.Continues(tempFace))
+								{
+									if (xp.Add(vertices, normals, tex, indices, index))
+										index += 4;
+									xp.CopyFrom(tempFace);
+								} else {
+									xp.continuation++;
+								}
 							}
 							if (IsBlockTransparentDuringGeneration(x + 1, y, z)) {
-								vertices.Add(new Vector3(x + 1, y, z));
-								vertices.Add(new Vector3(x + 1, y, z + 1));
-								vertices.Add(new Vector3(x + 1, y + 1, z + 1));
-								vertices.Add(new Vector3(x + 1, y + 1, z));
-
-								float texture = 1;
-								tex.Add(new Vector2(1, (texture + 1) / TEX_SIZE));
-								tex.Add(new Vector2(0, (texture + 1) / TEX_SIZE));
-								tex.Add(new Vector2(0, texture / TEX_SIZE));
-								tex.Add(new Vector2(1, texture / TEX_SIZE));
-								
-								normals.Add(Vector3.Right);
-								normals.Add(Vector3.Right);
-								normals.Add(Vector3.Right);
-								normals.Add(Vector3.Right);
-								
-								indices.Add(index);
-								indices.Add(index + 1);
-								indices.Add(index + 3);
-								indices.Add(index + 1);
-								indices.Add(index + 2);
-								indices.Add(index + 3);
-								
-								index += 4;
+								tempFace.Set(new Vector3I(x, y, z), 1, Face.Facing.RIGHT);
+								if (!xn.Continues(tempFace))
+								{
+									if (xn.Add(vertices, normals, tex, indices, index))
+										index += 4;
+									xn.CopyFrom(tempFace);
+								} else {
+									xn.continuation++;
+								}
 							}
 							if (IsBlockTransparentDuringGeneration(x, y - 1, z)) {
-								vertices.Add(new Vector3(x, y, z));
-								vertices.Add(new Vector3(x + 1, y, z));
-								vertices.Add(new Vector3(x, y, z + 1));
-								vertices.Add(new Vector3(x + 1, y, z + 1));
-
-								float texture = 3;
-								tex.Add(new Vector2(1, texture / TEX_SIZE));
-								tex.Add(new Vector2(0, texture / TEX_SIZE));
-								tex.Add(new Vector2(1, (texture + 1) / TEX_SIZE));
-								tex.Add(new Vector2(0, (texture + 1) / TEX_SIZE));
-
-								normals.Add(Vector3.Down);
-								normals.Add(Vector3.Down);
-								normals.Add(Vector3.Down);
-								normals.Add(Vector3.Down);
-
-								indices.Add(index);
-								indices.Add(index + 2);
-								indices.Add(index + 1);
-								indices.Add(index + 3);
-								indices.Add(index + 1);
-								indices.Add(index + 2);
-								
-								index += 4;
+								tempFace.Set(new Vector3I(x, y, z), 1, Face.Facing.DOWN);
+								if (!yn.Continues(tempFace))
+								{
+									if (yn.Add(vertices, normals, tex, indices, index))
+										index += 4;
+									yn.CopyFrom(tempFace);
+								} else {
+									yn.continuation++;
+								}
 							}
 							if (IsBlockTransparentDuringGeneration(x, y + 1, z)) {
-								vertices.Add(new Vector3(x, y + 1, z));
-								vertices.Add(new Vector3(x + 1, y + 1, z));
-								vertices.Add(new Vector3(x, y + 1, z + 1));
-								vertices.Add(new Vector3(x + 1, y + 1, z + 1));
-
-								float texture = 2;
-								tex.Add(new Vector2(0, texture / TEX_SIZE));
-								tex.Add(new Vector2(1, texture / TEX_SIZE));
-								tex.Add(new Vector2(0, (texture + 1) / TEX_SIZE));
-								tex.Add(new Vector2(1, (texture + 1) / TEX_SIZE));
-
-								normals.Add(Vector3.Up);
-								normals.Add(Vector3.Up);
-								normals.Add(Vector3.Up);
-								normals.Add(Vector3.Up);
-
-								indices.Add(index);
-								indices.Add(index + 1);
-								indices.Add(index + 2);
-								indices.Add(index + 3);
-								indices.Add(index + 2);
-								indices.Add(index + 1);
-								
-								index += 4;
+								tempFace.Set(new Vector3I(x, y, z), 1, Face.Facing.UP);
+								if (!yp.Continues(tempFace))
+								{
+									if (yp.Add(vertices, normals, tex, indices, index))
+										index += 4;
+									yp.CopyFrom(tempFace);
+								} else {
+									yp.continuation++;
+								}
 							}
 							if (IsBlockTransparentDuringGeneration(x, y, z - 1)) {
-								vertices.Add(new Vector3(x, y, z));
-								vertices.Add(new Vector3(x + 1, y, z));
-								vertices.Add(new Vector3(x, y + 1, z));
-								vertices.Add(new Vector3(x + 1, y + 1, z));
-
-								float texture = 1;
-								tex.Add(new Vector2(1, (texture + 1) / TEX_SIZE));
-								tex.Add(new Vector2(0, (texture + 1) / TEX_SIZE));
-								tex.Add(new Vector2(1, texture / TEX_SIZE));
-								tex.Add(new Vector2(0, texture / TEX_SIZE));
-								
-								normals.Add(Vector3.Forward);
-								normals.Add(Vector3.Forward);
-								normals.Add(Vector3.Forward);
-								normals.Add(Vector3.Forward);
-								
-								indices.Add(index);
-								indices.Add(index + 1);
-								indices.Add(index + 2);
-								indices.Add(index + 3);
-								indices.Add(index + 2);
-								indices.Add(index + 1);
-								
-								index += 4;
+								tempFace.Set(new Vector3I(x, y, z), 1, Face.Facing.FORWARD);
+								if (!zn.Continues(tempFace))
+								{
+									if (zn.Add(vertices, normals, tex, indices, index))
+										index += 4;
+									zn.CopyFrom(tempFace);
+								} else {
+									zn.continuation++;
+								}
 							}
 							if (IsBlockTransparentDuringGeneration(x, y, z + 1)) {
-								vertices.Add(new Vector3(x, y, z + 1));
-								vertices.Add(new Vector3(x + 1, y, z + 1));
-								vertices.Add(new Vector3(x, y + 1, z + 1));
-								vertices.Add(new Vector3(x + 1, y + 1, z + 1));
-
-								float texture = 1;
-								tex.Add(new Vector2(0, (texture + 1) / TEX_SIZE));
-								tex.Add(new Vector2(1, (texture + 1) / TEX_SIZE));
-								tex.Add(new Vector2(0, texture / TEX_SIZE));
-								tex.Add(new Vector2(1, texture / TEX_SIZE));
-								
-								normals.Add(Vector3.Back);
-								normals.Add(Vector3.Back);
-								normals.Add(Vector3.Back);
-								normals.Add(Vector3.Back);
-								
-								indices.Add(index + 2);
-								indices.Add(index + 3);
-								indices.Add(index + 1);
-								indices.Add(index + 1);
-								indices.Add(index);
-								indices.Add(index + 2);
-								
-								index += 4;
+								tempFace.Set(new Vector3I(x, y, z), 1, Face.Facing.BACK);
+								if (!zp.Continues(tempFace))
+								{
+									if (zp.Add(vertices, normals, tex, indices, index))
+										index += 4;
+									zp.CopyFrom(tempFace);
+								} else {
+									zp.continuation++;
+								}
 							}
 						}
 					}
 				}
 			}
 		}
+
+		if (xp.Add(vertices, normals, tex, indices, index))
+			index += 4;
+		if (xn.Add(vertices, normals, tex, indices, index))
+			index += 4;
+		if (yp.Add(vertices, normals, tex, indices, index))
+			index += 4;
+		if (yn.Add(vertices, normals, tex, indices, index))
+			index += 4;
+		if (zp.Add(vertices, normals, tex, indices, index))
+			index += 4;
+		if (zn.Add(vertices, normals, tex, indices, index))
+			index += 4;
 		
 		if (index != 0) {
 			arrays[(int) Mesh.ArrayType.Vertex] = Variant.From(vertices.ToArray());
 			arrays[(int) Mesh.ArrayType.Normal] = Variant.From(normals.ToArray());
-			arrays[(int) Mesh.ArrayType.TexUV] = Variant.From(tex.ToArray());
+			arrays[(int) Mesh.ArrayType.Weights] = Variant.From(tex.ToArray());
 			arrays[(int) Mesh.ArrayType.Index] = Variant.From(indices.ToArray());
 			
 			((ArrayMesh) meshInstance.Mesh).AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
@@ -373,7 +297,7 @@ public partial class Chunk : Node3D, ICompilable
 
 		double end_t = Time.GetTicksUsec();
 		
-		GD.Print("Took msec: ", (end_t - t) * 0.001);
+		//GD.Print("Took msec: ", (end_t - t) * 0.001);
 		return (end_t - t) * 0.001;
 	}
 }

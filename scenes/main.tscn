@@ -33,9 +33,9 @@ seamless = true
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tefeu"]
 shader = ExtResource("2_tbgi4")
 shader_parameter/sun_angle_max = 0.0
-shader_parameter/sky_zenith_color = Color(0.3470124, 0.41910607, 0.53229254, 1)
-shader_parameter/sky_horizon_color = Color(0.7674936, 0.62934303, 0.5782549, 1)
-shader_parameter/sky_nadir_color = Color(0.57587945, 0.4279866, 0.50338954, 1)
+shader_parameter/sky_zenith_color = Color(0.37960488, 0.45038316, 0.546908, 1)
+shader_parameter/sky_horizon_color = Color(0.66226226, 0.65167546, 0.65893227, 1)
+shader_parameter/sky_nadir_color = Color(0.44276178, 0.47206333, 0.57752454, 1)
 shader_parameter/star_noise = SubResource("NoiseTexture2D_choun")
 
 [sub_resource type="Sky" id="Sky_h2yge"]
@@ -85,7 +85,7 @@ nadirDuskColor = Color(0.87, 0.3306, 0.33958986, 1)
 nightGradient = SubResource("Gradient_o6xl0")
 
 [node name="Sun" type="DirectionalLight3D" parent="World/WorldEnvironment"]
-transform = Transform3D(4.1940876e-08, -0.281722, -0.9594961, -1.2314461e-08, -0.9594961, 0.281722, -1, 9.380479e-15, -4.371136e-08, -3.1789246, 0, 0)
+transform = Transform3D(2.4044422e-08, -0.83511674, -0.5500727, -3.650409e-08, -0.5500727, 0.83511674, -1, 9.380479e-15, -4.371136e-08, -3.1789246, 0, 0)
 light_bake_mode = 0
 shadow_enabled = true
 shadow_bias = 0.3

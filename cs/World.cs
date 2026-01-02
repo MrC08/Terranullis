@@ -238,7 +238,6 @@ public partial class World : Node3D
 		if (chunk == null)
 			return false;
 
-		GD.Print(gx, " ", gy, " ", gz);
 		int x = gx % Chunk.CHUNK_SIZE;
 		int y = gy % Chunk.CHUNK_VSIZE;
 		int z = gz % Chunk.CHUNK_SIZE;

@@ -27,6 +27,7 @@ const mat4 dither_matrix = mat4(
 );
 
 varying float dist;
+varying vec2 uv;
 
 void vertex() {
 	VERTEX = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -38,6 +39,14 @@ void vertex() {
 	vec4 a = INV_VIEW_MATRIX * vec4(VERTEX, 1.0);
 
 	dist = distance(a.xz, world_camera.xz);
+
+	// Extract UV coordinates
+	if (!lod) {
+		uv = BONE_WEIGHTS.xy;
+		uv.x /= BONE_WEIGHTS.z; // Correct for greedy meshing
+	} else {
+		uv = UV;
+	}
 }
 
 
@@ -66,15 +75,15 @@ void fragment() {
 
 
 	// Default material shader
-	vec4 albedo_tex = texture(texture_albedo, UV);
+	vec4 albedo_tex = texture(texture_albedo, uv);
 	ALBEDO = albedo_tex.rgb;
 
-	float metallic_tex = dot(texture(texture_metallic, UV), metallic_texture_channel);
+	float metallic_tex = dot(texture(texture_metallic, uv), metallic_texture_channel);
 	METALLIC = metallic_tex * metallic;
 	SPECULAR = specular;
 
 	vec4 roughness_texture_channel = vec4(1.0, 0.0, 0.0, 0.0);
-	float roughness_tex = dot(texture(texture_roughness, UV), roughness_texture_channel);
+	float roughness_tex = dot(texture(texture_roughness, uv), roughness_texture_channel);
 	ROUGHNESS = roughness_tex * roughness;
 	ALPHA *= albedo_tex.a;
 	ALPHA_SCISSOR_THRESHOLD = alpha_scissor_threshold;
@@ -86,10 +95,10 @@ void fragment() {
 
 	// Pixelate shadows; credit: https://forum.godotengine.org/t/shader-for-pixelated-shadows-3d/115691/7
 	vec2 tex_size = vec2(textureSize(texture_albedo, 0));
-	vec2 nearest_texel = (floor(UV * tex_size) + 0.5) / tex_size;
-	vec2 offset = nearest_texel - UV;
-	vec2 x_derivative = dFdx(UV);
-	vec2 y_derivative = dFdy(UV);
+	vec2 nearest_texel = (floor(uv * tex_size) + 0.5) / tex_size;
+	vec2 offset = nearest_texel - uv;
+	vec2 x_derivative = dFdx(uv);
+	vec2 y_derivative = dFdy(uv);
 
 	offset /= x_derivative.s*y_derivative.t - y_derivative.s*x_derivative.t;
 	vec2 frag_delta = vec2(
