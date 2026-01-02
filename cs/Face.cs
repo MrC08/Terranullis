@@ -3,45 +3,169 @@ using Godot;
 
 public struct Face
 {
-	public Vector3 position1;
-	public Vector3 position2;
-	public Vector3 position3;
-	public Vector3 position4;
+	public enum Facing
+	{
+		UP, DOWN, LEFT, RIGHT, BACK, FORWARD
+	}
+
+	public Vector3 position;
 
 	public int texture;
 
-	public int index1;
-	public int index2;
-	public int index3;
-	public int index4;
-	public int index5;
-	public int index6;
+	public Facing facing;
 
-	public Vector3 normal;
-
-	public void add(List<Vector3> vertices, List<Vector3> normals, List<Vector2> tex, List<int> indices, int index)
+	public void Add(List<Vector3> vertices, List<Vector3> normals, List<Vector2> tex, List<int> indices, int index)
 	{
-		vertices.Add(position1);
-		vertices.Add(position2);
-		vertices.Add(position3);
-		vertices.Add(position4);
+		if (facing == Facing.LEFT)
+		{
+			vertices.Add(position);
+			vertices.Add(position + Vector3.Back);
+			vertices.Add(position + Vector3.Up + Vector3.Back);
+			vertices.Add(position + Vector3.Up);
+		
+			indices.Add(index);
+			indices.Add(index + 3);
+			indices.Add(index + 1);
+			indices.Add(index + 1);
+			indices.Add(index + 3);
+			indices.Add(index + 2);
 
-		tex.Add(new Vector2(0, (texture + 1) / Chunk.TEX_SIZE));
-		tex.Add(new Vector2(1, (texture + 1) / Chunk.TEX_SIZE));
-		tex.Add(new Vector2(1, texture / Chunk.TEX_SIZE));
-		tex.Add(new Vector2(0, texture / Chunk.TEX_SIZE));
-		
-		normals.Add(normal);
-		normals.Add(normal);
-		normals.Add(normal);
-		normals.Add(normal);
-		
-		indices.Add(index1);
-		indices.Add(index2);
-		indices.Add(index3);
-		indices.Add(index4);
-		indices.Add(index5);
-		indices.Add(index6);
+			tex.Add(new Vector2(0, (texture + 1) / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(1, (texture + 1) / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(1, texture / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(0, texture / Chunk.TEX_SIZE));
+
+			normals.Add(Vector3.Left);
+			normals.Add(Vector3.Left);
+			normals.Add(Vector3.Left);
+			normals.Add(Vector3.Left);
+		} else if (facing == Facing.RIGHT)
+		{
+			vertices.Add(new Vector3(position.X + 1, position.Y, position.Z));
+			vertices.Add(new Vector3(position.X + 1, position.Y, position.Z + 1));
+			vertices.Add(new Vector3(position.X + 1, position.Y + 1, position.Z + 1));
+			vertices.Add(new Vector3(position.X + 1, position.Y + 1, position.Z));
+			
+			indices.Add(index);
+			indices.Add(index + 1);
+			indices.Add(index + 3);
+			indices.Add(index + 1);
+			indices.Add(index + 2);
+			indices.Add(index + 3);
+
+			tex.Add(new Vector2(1, (texture + 1) / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(0, (texture + 1) / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(0, texture / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(1, texture / Chunk.TEX_SIZE));
+			
+			normals.Add(Vector3.Right);
+			normals.Add(Vector3.Right);
+			normals.Add(Vector3.Right);
+			normals.Add(Vector3.Right);
+		} else if (facing == Facing.DOWN)
+		{
+			vertices.Add(new Vector3(position.X, position.Y, position.Z));
+			vertices.Add(new Vector3(position.X + 1, position.Y, position.Z));
+			vertices.Add(new Vector3(position.X, position.Y, position.Z + 1));
+			vertices.Add(new Vector3(position.X + 1, position.Y, position.Z + 1));
+
+			float texture = 3;
+			tex.Add(new Vector2(1, texture / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(0, texture / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(1, (texture + 1) / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(0, (texture + 1) / Chunk.TEX_SIZE));
+
+			normals.Add(Vector3.Down);
+			normals.Add(Vector3.Down);
+			normals.Add(Vector3.Down);
+			normals.Add(Vector3.Down);
+
+			indices.Add(index);
+			indices.Add(index + 2);
+			indices.Add(index + 1);
+			indices.Add(index + 3);
+			indices.Add(index + 1);
+			indices.Add(index + 2);
+		} else if (facing == Facing.UP)
+		{
+			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z));
+			vertices.Add(new Vector3(position.X + 1, position.Y + 1, position.Z));
+			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z + 1));
+			vertices.Add(new Vector3(position.X + 1, position.Y + 1, position.Z + 1));
+
+			float texture = 2;
+			tex.Add(new Vector2(0, texture / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(1, texture / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(0, (texture + 1) / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(1, (texture + 1) / Chunk.TEX_SIZE));
+
+			normals.Add(Vector3.Up);
+			normals.Add(Vector3.Up);
+			normals.Add(Vector3.Up);
+			normals.Add(Vector3.Up);
+
+			indices.Add(index);
+			indices.Add(index + 1);
+			indices.Add(index + 2);
+			indices.Add(index + 3);
+			indices.Add(index + 2);
+			indices.Add(index + 1);
+		} else if (facing == Facing.FORWARD)
+		{
+			vertices.Add(new Vector3(position.X, position.Y, position.Z));
+			vertices.Add(new Vector3(position.X + 1, position.Y, position.Z));
+			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z));
+			vertices.Add(new Vector3(position.X + 1, position.Y + 1, position.Z));
+
+			float texture = 1;
+			tex.Add(new Vector2(1, (texture + 1) / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(0, (texture + 1) / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(1, texture / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(0, texture / Chunk.TEX_SIZE));
+			
+			normals.Add(Vector3.Forward);
+			normals.Add(Vector3.Forward);
+			normals.Add(Vector3.Forward);
+			normals.Add(Vector3.Forward);
+			
+			indices.Add(index);
+			indices.Add(index + 1);
+			indices.Add(index + 2);
+			indices.Add(index + 3);
+			indices.Add(index + 2);
+			indices.Add(index + 1);
+		} else
+		{
+			vertices.Add(new Vector3(position.X, position.Y, position.Z + 1));
+			vertices.Add(new Vector3(position.X + 1, position.Y, position.Z + 1));
+			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z + 1));
+			vertices.Add(new Vector3(position.X + 1, position.Y + 1, position.Z + 1));
+
+			float texture = 1;
+			tex.Add(new Vector2(0, (texture + 1) / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(1, (texture + 1) / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(0, texture / Chunk.TEX_SIZE));
+			tex.Add(new Vector2(1, texture / Chunk.TEX_SIZE));
+			
+			normals.Add(Vector3.Back);
+			normals.Add(Vector3.Back);
+			normals.Add(Vector3.Back);
+			normals.Add(Vector3.Back);
+			
+			indices.Add(index + 2);
+			indices.Add(index + 3);
+			indices.Add(index + 1);
+			indices.Add(index + 1);
+			indices.Add(index);
+			indices.Add(index + 2);
+		}
+	}
+
+	public void Set(Vector3 position, int texture, Facing facing)
+	{
+		this.position = position;
+		this.texture = texture;
+		this.facing = facing;
 	}
 
 	public override bool Equals(object obj)
@@ -54,17 +178,8 @@ public struct Face
 		Face f = (Face) obj;
 		return
 			f.texture == texture &&
-			f.index1 == index1 &&
-			f.index2 == index2 &&
-			f.index3 == index3 &&
-			f.index4 == index4 &&
-			f.index5 == index5 &&
-			f.index6 == index6 &&
-			f.normal.Equals(normal) &&
-			f.position1.Equals(position1) &&
-			f.position2.Equals(position2) &&
-			f.position3.Equals(position3) &&
-			f.position4.Equals(position4);
+			f.facing == facing &&
+			f.position.Equals(position);
 	}
 
 	public override int GetHashCode()

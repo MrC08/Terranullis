@@ -93,9 +93,10 @@ public partial class Player : CharacterBody3D
 		{
 			if (buttonEvent.IsPressed())
 			{
-				Input.MouseMode = Input.MouseModeEnum.Captured;
-
-				if (buttonEvent.ButtonIndex == MouseButton.WheelUp)
+				if (Input.MouseMode != Input.MouseModeEnum.Captured)
+				{
+					Input.MouseMode = Input.MouseModeEnum.Captured;
+				} else if (buttonEvent.ButtonIndex == MouseButton.WheelUp)
 				{
 					flightSpeed *= 1.1f;
 				} else if (buttonEvent.ButtonIndex == MouseButton.WheelDown)

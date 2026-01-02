@@ -44,9 +44,10 @@ public partial class SkyManager : WorldEnvironment
 		float solarAltitude = MathF.Abs(sun.RotationDegrees.X) > 90 ? (Math.Sign(sun.RotationDegrees.X) * 180) - sun.RotationDegrees.X : sun.RotationDegrees.X;
 		float sunsetFactor = (float) Math.Pow(1 - Math.Abs(Math.Min(solarAltitude + 2.5, 89)) / 90, 2.75) / 1.85f;
 
+		sun.LightEnergy = Math.Clamp(-solarAltitude * 0.125f, 0, 1);
+		sun.ShadowEnabled = sun.LightEnergy > 0;
 
 		if (solarAltitude > 0) {
-			sun.LightEnergy = Math.Max(0, 1 - solarAltitude / 5);
 			((ShaderMaterial) Environment.Sky.SkyMaterial).SetShaderParameter("sun_angle_max", Math.Max(0, 25 - solarAltitude * 18));
 
 			float nightFactor = MathF.Min(1, solarAltitude / 360f);
@@ -56,7 +57,6 @@ public partial class SkyManager : WorldEnvironment
 
 			sunsetFactor = (float) Math.Pow(sunsetFactor, Math.Max(1, solarAltitude / 20f));
 		} else {
-			sun.LightEnergy = 1;
 			((ShaderMaterial) Environment.Sky.SkyMaterial).SetShaderParameter("sun_angle_max", 25);
 		}
 

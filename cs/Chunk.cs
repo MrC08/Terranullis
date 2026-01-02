@@ -169,6 +169,13 @@ public partial class Chunk : Node3D, ICompilable
 		if (chunk != null)
 			cachedBlockdataZN = chunk.blockData;
 		
+		Face xp = new Face();
+		Face xn = new Face();
+		Face yp = new Face();
+		Face yn = new Face();
+		Face zp = new Face();
+		Face zn = new Face();
+
 		for (int yChunk = 0; yChunk < CHUNK_VSIZE / 16; yChunk++) {
 			if (blockData.staticData[yChunk] == 0)
 			{
@@ -207,7 +214,7 @@ public partial class Chunk : Node3D, ICompilable
 								indices.Add(index + 1);
 								indices.Add(index + 3);
 								indices.Add(index + 2);
-								
+
 								index += 4;
 							}
 							if (IsBlockTransparentDuringGeneration(x + 1, y, z)) {
@@ -366,7 +373,7 @@ public partial class Chunk : Node3D, ICompilable
 
 		double end_t = Time.GetTicksUsec();
 		
-		//GD.Print("Took msec: ", (end_t - t) * 0.001);
+		GD.Print("Took msec: ", (end_t - t) * 0.001);
 		return (end_t - t) * 0.001;
 	}
 }
