@@ -8,6 +8,9 @@ public struct Face
 		UP, DOWN, LEFT, RIGHT, BACK, FORWARD, NULL
 	}
 
+	private const float e0 = -0.0002f;
+	private const float e1 = 1.0002f;
+
 	public Vector3I position;
 	public int texture;
 	public Facing facing;
@@ -25,10 +28,10 @@ public struct Face
 	{
 		if (facing == Facing.LEFT)
 		{
-			vertices.Add(new Vector3(position.X, position.Y, position.Z));
-			vertices.Add(new Vector3(position.X, position.Y, position.Z + continuation));
-			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z + continuation));
-			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z));
+			vertices.Add(new Vector3(position.X, position.Y + e0, position.Z + e0));
+			vertices.Add(new Vector3(position.X, position.Y + e0, position.Z + continuation * e1));
+			vertices.Add(new Vector3(position.X, position.Y + e1, position.Z + continuation * e1));
+			vertices.Add(new Vector3(position.X, position.Y + e1, position.Z + e0));
 		
 			indices.Add(index);
 			indices.Add(index + 3);
@@ -37,10 +40,10 @@ public struct Face
 			indices.Add(index + 3);
 			indices.Add(index + 2);
 
-			tex.Add(0); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(1); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(1); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(0); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.0001f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.9999f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.9999f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.0001f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 
 			normals.Add(Vector3.Left);
 			normals.Add(Vector3.Left);
@@ -51,10 +54,10 @@ public struct Face
 			return true;
 		} else if (facing == Facing.RIGHT)
 		{
-			vertices.Add(new Vector3(position.X + 1, position.Y, position.Z));
-			vertices.Add(new Vector3(position.X + 1, position.Y, position.Z + continuation));
-			vertices.Add(new Vector3(position.X + 1, position.Y + 1, position.Z + continuation));
-			vertices.Add(new Vector3(position.X + 1, position.Y + 1, position.Z));
+			vertices.Add(new Vector3(position.X + 1f, position.Y + e0, position.Z + e0));
+			vertices.Add(new Vector3(position.X + 1f, position.Y + e0, position.Z + continuation * e1));
+			vertices.Add(new Vector3(position.X + 1f, position.Y + e1, position.Z + continuation * e1));
+			vertices.Add(new Vector3(position.X + 1f, position.Y + e1, position.Z + e0));
 			
 			indices.Add(index);
 			indices.Add(index + 1);
@@ -63,10 +66,10 @@ public struct Face
 			indices.Add(index + 2);
 			indices.Add(index + 3);
 
-			tex.Add(1); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(0); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(0); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(1); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.9999f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.0001f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.0001f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.9999f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			
 			normals.Add(Vector3.Right);
 			normals.Add(Vector3.Right);
@@ -77,16 +80,16 @@ public struct Face
 			return true;
 		} else if (facing == Facing.DOWN)
 		{
-			vertices.Add(new Vector3(position.X, position.Y, position.Z));
-			vertices.Add(new Vector3(position.X + 1, position.Y, position.Z));
-			vertices.Add(new Vector3(position.X, position.Y, position.Z + continuation));
-			vertices.Add(new Vector3(position.X + 1, position.Y, position.Z + continuation));
+			vertices.Add(new Vector3(position.X + e0, position.Y, position.Z + e0));
+			vertices.Add(new Vector3(position.X + e1, position.Y, position.Z + e0));
+			vertices.Add(new Vector3(position.X + e0, position.Y, position.Z + continuation * e1));
+			vertices.Add(new Vector3(position.X + e1, position.Y, position.Z + continuation * e1));
 
 			float texture = 3;
-			tex.Add(1); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(1); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(0); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(0); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.9999f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.9999f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.0001f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.0001f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 
 			normals.Add(Vector3.Down);
 			normals.Add(Vector3.Down);
@@ -104,16 +107,16 @@ public struct Face
 			return true;
 		} else if (facing == Facing.UP)
 		{
-			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z));
-			vertices.Add(new Vector3(position.X + 1, position.Y + 1, position.Z));
-			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z + continuation));
-			vertices.Add(new Vector3(position.X + 1, position.Y + 1, position.Z + continuation));
+			vertices.Add(new Vector3(position.X + e0, position.Y + 1f, position.Z + e0));
+			vertices.Add(new Vector3(position.X + e1, position.Y + 1f, position.Z + e0));
+			vertices.Add(new Vector3(position.X + e0, position.Y + 1f, position.Z + continuation * e1));
+			vertices.Add(new Vector3(position.X + e1, position.Y + 1f, position.Z + continuation * e1));
 
 			float texture = 2;
-			tex.Add(0); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(0); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(1); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(1); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.0001f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.0001f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.9999f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.9999f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 
 			normals.Add(Vector3.Up);
 			normals.Add(Vector3.Up);
@@ -131,16 +134,16 @@ public struct Face
 			return true;
 		} else if (facing == Facing.FORWARD)
 		{
-			vertices.Add(new Vector3(position.X, position.Y, position.Z));
-			vertices.Add(new Vector3(position.X + continuation, position.Y, position.Z));
-			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z));
-			vertices.Add(new Vector3(position.X + continuation, position.Y + 1, position.Z));
+			vertices.Add(new Vector3(position.X + e0, position.Y + e0, position.Z));
+			vertices.Add(new Vector3(position.X + continuation * e1, position.Y + e0, position.Z));
+			vertices.Add(new Vector3(position.X + e0, position.Y + e1, position.Z));
+			vertices.Add(new Vector3(position.X + continuation * e1, position.Y + e1, position.Z));
 
 			float texture = 1;
-			tex.Add(1); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(0); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(1); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(0); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.9999f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.0001f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.9999f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.0001f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			
 			normals.Add(Vector3.Forward);
 			normals.Add(Vector3.Forward);
@@ -158,16 +161,16 @@ public struct Face
 			return true;
 		} else if (facing == Facing.BACK)
 		{
-			vertices.Add(new Vector3(position.X, position.Y, position.Z + 1));
-			vertices.Add(new Vector3(position.X + continuation, position.Y, position.Z + 1));
-			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z + 1));
-			vertices.Add(new Vector3(position.X + continuation, position.Y + 1, position.Z + 1));
+			vertices.Add(new Vector3(position.X + e0, position.Y + e0, position.Z + 1f));
+			vertices.Add(new Vector3(position.X + continuation * e1, position.Y + e0, position.Z + 1f));
+			vertices.Add(new Vector3(position.X + e0, position.Y + e1, position.Z + 1f));
+			vertices.Add(new Vector3(position.X + continuation * e1, position.Y + e1, position.Z + 1f));
 
 			float texture = 1;
-			tex.Add(0); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(1); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(0); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
-			tex.Add(1); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.0001f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.9999f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.0001f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
+			tex.Add(0.9999f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			
 			normals.Add(Vector3.Back);
 			normals.Add(Vector3.Back);

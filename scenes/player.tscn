@@ -16,7 +16,7 @@ albedo_color = Color(1, 1, 1, 0.039215688)
 
 [sub_resource type="BoxMesh" id="BoxMesh_3vyb7"]
 material = SubResource("StandardMaterial3D_3vyb7")
-size = Vector3(1.01, 1.01, 1.01)
+size = Vector3(1.02, 1.02, 1.02)
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_3vyb7")

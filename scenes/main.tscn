@@ -64,7 +64,7 @@ colors = PackedColorArray(0.42352942, 0.47843137, 0.5882353, 1, 0.56, 0.6066667,
 offsets = PackedFloat32Array(0, 0.056962024)
 colors = PackedColorArray(1, 1, 1, 1, 0.07806667, 0.053, 0.1, 1)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_jyhfs"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tbgi4"]
 shader = ExtResource("3_sugp2")
 
 [node name="Node3D" type="Node3D"]
@@ -108,8 +108,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 16, 2)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
-material = SubResource("ShaderMaterial_jyhfs")
+[node name="ColorRect3" type="ColorRect" parent="CanvasLayer"]
+texture_filter = 1
+material = SubResource("ShaderMaterial_tbgi4")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

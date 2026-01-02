@@ -1,6 +1,7 @@
 shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx, skip_vertex_transform;
 
+
 uniform sampler2D texture_albedo : source_color, filter_nearest, repeat_enable;
 uniform float alpha_scissor_threshold : hint_range(0.0, 1.0, 0.001);
 
@@ -28,8 +29,17 @@ const mat4 dither_matrix = mat4(
 
 varying float dist;
 varying vec2 uv;
+varying float vertex_id_interp;
+
+
+float random(vec2 seed) {
+	return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 
 void vertex() {
+	//VERTEX.y += random(vec2(float(VERTEX_ID) + VERTEX.x, VERTEX.z)) * 0.0001f;
+
 	VERTEX = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	NORMAL = normalize((MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	BINORMAL = normalize((MODELVIEW_MATRIX * vec4(BINORMAL, 0.0)).xyz);
@@ -47,6 +57,8 @@ void vertex() {
 	} else {
 		uv = UV;
 	}
+
+	vertex_id_interp = float(VERTEX_ID);
 }
 
 
@@ -73,6 +85,11 @@ void fragment() {
 		}
 	}
 
+	if (!lod) {
+		DEPTH = FRAGCOORD.z - 0.0000001 * vertex_id_interp;
+	} else {
+		DEPTH = FRAGCOORD.z;
+	}
 
 	// Default material shader
 	vec4 albedo_tex = texture(texture_albedo, uv);

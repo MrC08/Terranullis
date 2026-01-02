@@ -10,6 +10,11 @@ const mat4 dither_matrix = mat4(
 );
 
 const float res = 420.0;
+const float denoise_radius = 1.0 / 1000.0;
+
+float random(vec2 seed) {
+	return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
 
 void fragment() {
 	vec2 uv = SCREEN_UV;
@@ -31,8 +36,3 @@ void fragment() {
 	COLOR = round(COLOR);
 	COLOR /= 32.0;
 }
-
-//void light() {
-//	// Called for every pixel for every light affecting the CanvasItem.
-//	// Uncomment to replace the default light processing function with this one.
-//}

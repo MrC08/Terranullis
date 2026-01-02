@@ -4,7 +4,7 @@ using Godot;
 public partial class Player : CharacterBody3D
 {
 	const float SPEED = 5f;
-	const float JUMP_VELOCITY = 4.5f;
+	const float JUMP_VELOCITY = 7f;
 
 	Camera3D camera;
 	RayCast3D raycast;
@@ -115,6 +115,12 @@ public partial class Player : CharacterBody3D
 			if (keyEvent.Keycode == Key.Escape)
 			{
 				Input.MouseMode = Input.MouseModeEnum.Visible;
+			} else if (Input.IsActionJustPressed("F11"))
+			{
+				DisplayServer.WindowSetMode(
+					DisplayServer.WindowGetMode() == DisplayServer.WindowMode.Fullscreen ?
+					DisplayServer.WindowMode.Windowed :
+					DisplayServer.WindowMode.Fullscreen);
 			}
 		}
 	}
