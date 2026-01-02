@@ -7,6 +7,8 @@ public partial class Player : CharacterBody3D
 	const float JUMP_VELOCITY = 4.5f;
 
 	Camera3D camera;
+	RayCast3D raycast;
+	World world;
 
 	bool flying = true;
 	float flightSpeed = SPEED;
@@ -15,6 +17,9 @@ public partial class Player : CharacterBody3D
 	public override void _Ready()
 	{
 		camera = (Camera3D) GetNode("Camera3D");
+		raycast = (RayCast3D) GetNode("RayCast3D");
+		world = (World) GetParent();
+		
 		camera.MakeCurrent();
 	}
 
@@ -67,6 +72,11 @@ public partial class Player : CharacterBody3D
 		}
 
 		MoveAndSlide();
+		raycast.TargetPosition = camera.Transform.Basis.Y * 4f;
+		Vector3 pos = (raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * -0.01f).Floor() + new Vector3(0.5f, 0.5f, 0.5f);
+
+		((Node3D) raycast.GetNode("Node3D")).GlobalPosition = pos;
+		((Node3D) raycast.GetNode("Node3D")).Visible = raycast.IsColliding();
 	}
 
 
@@ -74,8 +84,11 @@ public partial class Player : CharacterBody3D
 	{
 		if (@event is InputEventMouseMotion motionEvent)
 		{
-			Rotation -= new Vector3(0, motionEvent.ScreenRelative.X / 800, 0);
-			camera.Rotation -= new Vector3(motionEvent.ScreenRelative.Y / 800, 0, 0);
+			if (Input.MouseMode == Input.MouseModeEnum.Captured)
+			{
+				Rotation -= new Vector3(0, motionEvent.ScreenRelative.X / 800, 0);
+				camera.Rotation -= new Vector3(motionEvent.ScreenRelative.Y / 800, 0, 0);
+			}
 		} else if (@event is InputEventMouseButton buttonEvent)
 		{
 			if (buttonEvent.IsPressed())
@@ -88,6 +101,12 @@ public partial class Player : CharacterBody3D
 				} else if (buttonEvent.ButtonIndex == MouseButton.WheelDown)
 				{
 					flightSpeed *= 0.9f;
+				} else if (buttonEvent.ButtonIndex == MouseButton.Left)
+				{
+					world.SetBlock(raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * -0.01f, 0);
+				} else if (buttonEvent.ButtonIndex == MouseButton.Right)
+				{
+					world.SetBlock(raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * 0.01f, 1);
 				}
 			}
 		} else if (@event is InputEventKey keyEvent)
@@ -99,10 +118,3 @@ public partial class Player : CharacterBody3D
 		}
 	}
 }
-
-/*
-
-	elif event is InputEventKey:
-		if event.keycode == KEY_ESCAPE:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-*/

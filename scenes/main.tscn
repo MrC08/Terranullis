@@ -33,9 +33,9 @@ seamless = true
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tefeu"]
 shader = ExtResource("2_tbgi4")
 shader_parameter/sun_angle_max = 0.0
-shader_parameter/sky_zenith_color = Color(0.384259, 0.45484942, 0.5489951, 1)
-shader_parameter/sky_horizon_color = Color(0.64723563, 0.6548645, 0.6704527, 1)
-shader_parameter/sky_nadir_color = Color(0.42375302, 0.47835734, 0.5881108, 1)
+shader_parameter/sky_zenith_color = Color(0.3598712, 0.4314459, 0.5380589, 1)
+shader_parameter/sky_horizon_color = Color(0.7259764, 0.6381539, 0.6100848, 1)
+shader_parameter/sky_nadir_color = Color(0.5233602, 0.4453763, 0.53263825, 1)
 shader_parameter/star_noise = SubResource("NoiseTexture2D_choun")
 
 [sub_resource type="Sky" id="Sky_h2yge"]
@@ -81,15 +81,17 @@ nadirDuskColor = Color(0.87, 0.3306, 0.33958986, 1)
 nightGradient = SubResource("Gradient_o6xl0")
 
 [node name="Sun" type="DirectionalLight3D" parent="World/WorldEnvironment"]
-transform = Transform3D(0.066801615, -0.9975496, -0.020806974, -0.075921096, -0.02587533, 0.9967779, -0.99487364, -0.0650067, -0.07746359, 0, 0, 0)
-light_specular = 16.0
+transform = Transform3D(-3.8873786e-08, -0.45726863, 0.8893286, -1.9987848e-08, 0.8893286, 0.45726874, -1, 0, -4.371139e-08, 0, 0, 0)
+light_bake_mode = 0
 shadow_enabled = true
-shadow_bias = 0.05
-directional_shadow_split_1 = 0.032
-directional_shadow_split_2 = 0.155
-directional_shadow_split_3 = 0.547
+shadow_caster_mask = 4294966273
+directional_shadow_mode = 1
+directional_shadow_split_1 = 0.248
+directional_shadow_split_2 = 0.495
+directional_shadow_split_3 = 0.649
 directional_shadow_blend_splits = true
-directional_shadow_max_distance = 300.0
+directional_shadow_max_distance = 256.0
+directional_shadow_pancake_size = 2.5
 
 [node name="ChunkManager" type="Node3D" parent="World"]
 
@@ -105,5 +107,32 @@ material = SubResource("ShaderMaterial_jyhfs")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect2" type="ColorRect" parent="CanvasLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -4.0
+offset_top = -1.0
+offset_right = 4.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect2" type="ColorRect" parent="CanvasLayer/ColorRect2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -1.0
+offset_top = -4.0
+offset_right = 1.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2

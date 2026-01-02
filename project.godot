@@ -13,7 +13,6 @@ config_version=5
 config/name="Terranullis"
 run/main_scene="uid://cs5hhep0lin7l"
 config/features=PackedStringArray("4.5", "C#", "Forward Plus")
-run/max_fps=200
 config/icon="res://icon.svg"
 
 [display]
@@ -70,10 +69,8 @@ common/physics_interpolation=true
 
 lights_and_shadows/directional_shadow/size=16384
 lights_and_shadows/directional_shadow/size.mobile=8192
-lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
-lights_and_shadows/directional_shadow/soft_shadow_filter_quality.mobile=3
-lights_and_shadows/directional_shadow/16_bits=false
-lights_and_shadows/positional_shadow/soft_shadow_filter_quality.mobile=2
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=0
+lights_and_shadows/positional_shadow/soft_shadow_filter_quality=0
 anti_aliasing/screen_space_roughness_limiter/enabled=false
 lights_and_shadows/positional_shadow/atlas_size=8192
 lights_and_shadows/positional_shadow/atlas_size.mobile=4096

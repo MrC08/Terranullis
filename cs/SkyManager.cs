@@ -24,7 +24,7 @@ public partial class SkyManager : WorldEnvironment
 		sun = (DirectionalLight3D) GetNode("Sun");
 	}
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
+
 	public override void _Process(double delta)
 	{
 		Vector3 playerPos = Vector3.Zero;
@@ -33,12 +33,9 @@ public partial class SkyManager : WorldEnvironment
 		if (!Engine.IsEditorHint()) {
 			playerPos = player.GlobalPosition;
 
-			//sun.RotateX((float) delta / 10);
-			sun.Rotation = sun.Rotation + new Vector3((float) delta * 0.004363323f * 1f, 0, 0);
+			sun.RotateZ((float) delta * 0.004363323f * 1f);
+			sun.Transform = sun.Transform.Orthonormalized();
 		}
-
-		if (sun.Rotation.X > Math.PI)
-			sun.Rotation -= new Vector3(2 * MathF.PI, 0, 0);
 
 		Color zenith = zenithColorGradient.Sample(playerPos.Y / 256);
 		Color horizon = horizonColorGradient.Sample(playerPos.Y / 256);

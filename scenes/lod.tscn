@@ -22,6 +22,7 @@ shader_parameter/lod = true
 script = ExtResource("1_dsy5w")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+layers = 2
 sorting_offset = -16.0
 material_override = SubResource("ShaderMaterial_rh5k0")
 mesh = SubResource("ArrayMesh_kdh3y")

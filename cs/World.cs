@@ -72,7 +72,7 @@ public partial class World : Node3D
 
 		chunkCompiler.wait();
 
-		/*if (WorldPosToChunk(player.GlobalPosition) == null)
+		if (WorldPosToChunk(player.GlobalPosition) == null)
 		{
 			CreateChunk((player.GlobalPosition / CHUNK_SCALAR).Floor());
 			chunkActivityThisFrame = true;
@@ -80,7 +80,7 @@ public partial class World : Node3D
 		if (!WorldPosToChunk(player.GlobalPosition).generated)
 			WorldPosToChunk(player.GlobalPosition).Generate();
 		if (WorldPosToChunk(player.GlobalPosition).needsCompilation)
-			WorldPosToChunk(player.GlobalPosition).Compile();*/
+			WorldPosToChunk(player.GlobalPosition).Compile();
 
 		List<ICompilable> chunksToGenerate = new List<ICompilable>();
 		List<ICompilable> chunksToCompile = new List<ICompilable>();
@@ -208,6 +208,72 @@ public partial class World : Node3D
 		return chunk.GetBlock(x, y, z);
 	}
 
+	public Chunk tryToGetChunkFromBlockCoords(int x, int y, int z)
+	{
+		if (y > 255 || y < -128)
+			return null;
+
+		int hash = Util.WorldPosToChunkName(new Vector3(x, y, z));
+
+		if (!chunkMap.ContainsKey(hash))
+			return null;
+
+		Chunk chunk = chunkMap[hash];
+
+		if (!chunk.generated)
+			return null;
+		
+		return chunk;
+	}
+
+	public void markChunkAsCompilationNeeded(Chunk chunk)
+	{
+		if (chunk != null)
+			chunk.needsCompilation = true;
+	}
+
+	public bool SetBlock(int gx, int gy, int gz, long block)
+	{
+		Chunk chunk = tryToGetChunkFromBlockCoords(gx, gy, gz);
+		if (chunk == null)
+			return false;
+
+		GD.Print(gx, " ", gy, " ", gz);
+		int x = gx % Chunk.CHUNK_SIZE;
+		int y = gy % Chunk.CHUNK_VSIZE;
+		int z = gz % Chunk.CHUNK_SIZE;
+
+		if (gx < 0)
+			x += Chunk.CHUNK_SIZE;
+		if (gy < 0)
+			y += Chunk.CHUNK_VSIZE;
+		if (gz < 0)
+			z += Chunk.CHUNK_SIZE;
+
+		chunk.SetBlock(x, y, z, block);
+		chunk.needsCompilation = true;
+
+		if (x == 0)
+			markChunkAsCompilationNeeded(tryToGetChunkFromBlockCoords(gx - 1, gy, gz));
+		if (x == Chunk.CHUNK_SIZE - 1)
+			markChunkAsCompilationNeeded(tryToGetChunkFromBlockCoords(gx + 1, gy, gz));
+		if (y == 0)
+			markChunkAsCompilationNeeded(tryToGetChunkFromBlockCoords(gx, gy - 1, gz));
+		if (y == Chunk.CHUNK_VSIZE - 1)
+			markChunkAsCompilationNeeded(tryToGetChunkFromBlockCoords(gx, gy + 1, gz));
+		if (z == 0)
+			markChunkAsCompilationNeeded(tryToGetChunkFromBlockCoords(gx, gy, gz - 1));
+		if (z == Chunk.CHUNK_SIZE - 1)
+			markChunkAsCompilationNeeded(tryToGetChunkFromBlockCoords(gx, gy, gz + 1));
+
+
+		return true;
+	}
+
+	public bool SetBlock(Vector3 v, long block)
+	{
+		return SetBlock((int) Math.Floor(v.X), (int) Math.Floor(v.Y), (int) Math.Floor(v.Z), block);
+	}
 
 	public Chunk WorldPosToChunk(Vector3 v)
 	{

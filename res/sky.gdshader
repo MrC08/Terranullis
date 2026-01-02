@@ -25,6 +25,6 @@ void sky() {
 
 	vec2 star_coords = (SKY_COORDS * 4.0);
 	COLOR = mix(COLOR, COLOR + texture(star_noise, star_coords).rgb, clamp(
-		pow(1.0 - max(COLOR.r, max(COLOR.g, COLOR.b)), 12.0)
+		pow(1.0 - max(COLOR.r, max(COLOR.g, COLOR.b)), 15.0)
 		, 0.0, 1.0));
 }
