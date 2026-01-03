@@ -74,7 +74,7 @@ common/physics_interpolation=true
 
 [rendering]
 
-lights_and_shadows/directional_shadow/size=8192
+lights_and_shadows/directional_shadow/size=16384
 lights_and_shadows/directional_shadow/size.mobile=8192
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality.mobile=2
 lights_and_shadows/positional_shadow/soft_shadow_filter_quality.mobile=2

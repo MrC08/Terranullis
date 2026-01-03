@@ -1,6 +1,5 @@
 shader_type sky;
 
-uniform float sun_angle_max;
 uniform vec3 sky_zenith_color : source_color;
 uniform vec3 sky_horizon_color : source_color;
 uniform vec3 sky_nadir_color : source_color;
@@ -25,6 +24,6 @@ void sky() {
 
 	vec2 star_coords = (SKY_COORDS * 4.0);
 	COLOR = mix(COLOR, COLOR + texture(star_noise, star_coords).rgb, clamp(
-		pow(1.0 - max(COLOR.r, max(COLOR.g, COLOR.b)), 15.0)
+		pow(1.0 - max(COLOR.r, max(COLOR.g, COLOR.b)), 16.0)
 		, 0.0, 1.0));
 }

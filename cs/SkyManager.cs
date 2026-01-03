@@ -4,7 +4,7 @@ using System;
 [Tool]
 public partial class SkyManager : WorldEnvironment
 {
-	CharacterBody3D player;
+	Player player;
 	DirectionalLight3D sun;
 
 	[Export] Gradient zenithColorGradient;
@@ -20,7 +20,7 @@ public partial class SkyManager : WorldEnvironment
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		player = (CharacterBody3D) GetParent().GetNode("Player");
+		player = (Player) GetParent().GetNode("Player");
 		sun = (DirectionalLight3D) GetNode("Sun");
 	}
 
@@ -35,6 +35,11 @@ public partial class SkyManager : WorldEnvironment
 
 			sun.RotateZ((float) delta * 0.004363323f * 1f);
 			sun.Transform = sun.Transform.Orthonormalized();
+
+			sun.GlobalPosition = playerPos;
+		} else
+		{
+			sun = (DirectionalLight3D) GetNode("Sun");
 		}
 
 		Color zenith = zenithColorGradient.Sample(playerPos.Y / 256);
@@ -42,22 +47,18 @@ public partial class SkyManager : WorldEnvironment
 		Color nadir = nadirColorGradient.Sample(playerPos.Y / 256);
 
 		float solarAltitude = MathF.Abs(sun.RotationDegrees.X) > 90 ? (Math.Sign(sun.RotationDegrees.X) * 180) - sun.RotationDegrees.X : sun.RotationDegrees.X;
-		float sunsetFactor = (float) Math.Pow(1 - Math.Abs(Math.Min(solarAltitude + 2.5, 89)) / 90, 2.75) / 1.85f;
+		float sunsetFactor = (float) Math.Pow(1 - Math.Abs(Math.Min(solarAltitude + 2.5, 89)) / 90, 3.0) / 2f;
 
 		sun.LightEnergy = Math.Clamp(-solarAltitude * 0.125f, 0, 1);
 		sun.ShadowEnabled = sun.LightEnergy > 0;
 
 		if (solarAltitude > 0) {
-			((ShaderMaterial) Environment.Sky.SkyMaterial).SetShaderParameter("sun_angle_max", Math.Max(0, 25 - solarAltitude * 18));
-
 			float nightFactor = MathF.Min(1, solarAltitude / 360f);
 			zenith *= nightGradient.Sample(nightFactor);
 			horizon *= nightGradient.Sample(nightFactor);
 			nadir *= nightGradient.Sample(nightFactor);
 
 			sunsetFactor = (float) Math.Pow(sunsetFactor, Math.Max(1, solarAltitude / 20f));
-		} else {
-			((ShaderMaterial) Environment.Sky.SkyMaterial).SetShaderParameter("sun_angle_max", 25);
 		}
 
 		zenith = zenith.Lerp(zenithDuskColor, sunsetFactor);

@@ -85,7 +85,7 @@ void fragment() {
 		}
 	}
 
-	if (!lod) {
+	if (!lod && dist < 32.0) {
 		DEPTH = FRAGCOORD.z - 0.0000001 * vertex_id_interp;
 	} else {
 		DEPTH = FRAGCOORD.z;

@@ -1,10 +1,12 @@
-[gd_scene load_steps=21 format=3 uid="uid://cs5hhep0lin7l"]
+[gd_scene load_steps=23 format=3 uid="uid://cs5hhep0lin7l"]
 
 [ext_resource type="Script" uid="uid://cajiepfijw2j0" path="res://cs/World.cs" id="1_sugp2"]
 [ext_resource type="PackedScene" uid="uid://dwuwtf8io6h4p" path="res://scenes/player.tscn" id="2_0xm2m"]
 [ext_resource type="Script" uid="uid://mvfk5tclye52" path="res://cs/SkyManager.cs" id="2_jyhfs"]
 [ext_resource type="Shader" uid="uid://clch5n05bh0qk" path="res://res/sky.gdshader" id="2_tbgi4"]
 [ext_resource type="Shader" uid="uid://qc755l8ef71q" path="res://res/post.gdshader" id="3_sugp2"]
+[ext_resource type="Script" uid="uid://bbnoex06qr4fw" path="res://cs/DebugMenu.cs" id="6_o6xl0"]
+[ext_resource type="LabelSettings" uid="uid://d0dw7236n1ebx" path="res://res/label_settings.tres" id="6_tefeu"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_0wfyh"]
 frequency = 0.05
@@ -32,10 +34,9 @@ seamless = true
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tefeu"]
 shader = ExtResource("2_tbgi4")
-shader_parameter/sun_angle_max = 0.0
-shader_parameter/sky_zenith_color = Color(0.37960488, 0.45038316, 0.546908, 1)
-shader_parameter/sky_horizon_color = Color(0.66226226, 0.65167546, 0.65893227, 1)
-shader_parameter/sky_nadir_color = Color(0.44276178, 0.47206333, 0.57752454, 1)
+shader_parameter/sky_zenith_color = Color(0.38085288, 0.4515808, 0.54746765, 1)
+shader_parameter/sky_horizon_color = Color(0.6582329, 0.6525306, 0.66202146, 1)
+shader_parameter/sky_nadir_color = Color(0.43766463, 0.47375104, 0.5803632, 1)
 shader_parameter/star_noise = SubResource("NoiseTexture2D_choun")
 
 [sub_resource type="Sky" id="Sky_h2yge"]
@@ -85,19 +86,14 @@ nadirDuskColor = Color(0.87, 0.3306, 0.33958986, 1)
 nightGradient = SubResource("Gradient_o6xl0")
 
 [node name="Sun" type="DirectionalLight3D" parent="World/WorldEnvironment"]
-transform = Transform3D(2.4044422e-08, -0.83511674, -0.5500727, -3.650409e-08, -0.5500727, 0.83511674, -1, 9.380479e-15, -4.371136e-08, -3.1789246, 0, 0)
+transform = Transform3D(2.4044422e-08, -0.83511674, -0.5500727, -3.650409e-08, -0.5500727, 0.83511674, -1, 9.380479e-15, -4.371136e-08, 0, 0, 0)
 light_bake_mode = 0
 shadow_enabled = true
 shadow_bias = 0.3
 shadow_opacity = 0.9
+shadow_blur = 2.0
 shadow_caster_mask = 4294966273
-directional_shadow_mode = 1
-directional_shadow_split_1 = 0.166
-directional_shadow_split_2 = 0.495
-directional_shadow_split_3 = 0.649
 directional_shadow_blend_splits = true
-directional_shadow_max_distance = 256.0
-directional_shadow_pancake_size = 0.7
 
 [node name="ChunkManager" type="Node3D" parent="World"]
 
@@ -143,3 +139,53 @@ offset_right = 1.0
 offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="Control" type="Control" parent="CanvasLayer"]
+texture_filter = 1
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("6_o6xl0")
+
+[node name="Position" type="Label" parent="CanvasLayer/Control"]
+layout_mode = 0
+offset_left = 2.0
+offset_right = 42.0
+offset_bottom = 16.0
+scale = Vector2(2, 2)
+text = "Pos:"
+label_settings = ExtResource("6_tefeu")
+
+[node name="Velocity" type="Label" parent="CanvasLayer/Control"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 32.0
+offset_right = 42.0
+offset_bottom = 48.0
+scale = Vector2(2, 2)
+text = "Vel:"
+label_settings = ExtResource("6_tefeu")
+
+[node name="Rotation" type="Label" parent="CanvasLayer/Control"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 64.0
+offset_right = 42.0
+offset_bottom = 80.0
+scale = Vector2(2, 2)
+text = "Rot:"
+label_settings = ExtResource("6_tefeu")
+
+[node name="FPS" type="Label" parent="CanvasLayer/Control"]
+layout_mode = 0
+offset_left = 1030.0
+offset_top = 1.0
+offset_right = 1089.0
+offset_bottom = 17.0
+scale = Vector2(2, 2)
+text = "XXX fps"
+label_settings = ExtResource("6_tefeu")
+horizontal_alignment = 2
