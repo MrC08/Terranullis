@@ -45,7 +45,6 @@ public partial class Chunk : Node3D, ICompilable
 		Position2D = new Vector2(GlobalPosition.X, GlobalPosition.Z);
 	}
 
-
 	public ulong GetBlock(int x, int y, int z, ulong fallback)
 	{
 		if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_VSIZE || z < 0 || z >= CHUNK_SIZE)
@@ -53,7 +52,6 @@ public partial class Chunk : Node3D, ICompilable
 		
 		return blockData.Get(x, y, z);
 	}
-
 
 	public ulong GetBlock(int x, int y, int z)
 	{

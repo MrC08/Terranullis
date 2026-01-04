@@ -141,7 +141,7 @@ offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Control" type="Control" parent="CanvasLayer"]
+[node name="DebugMenu" type="Control" parent="CanvasLayer"]
 texture_filter = 1
 layout_mode = 3
 anchors_preset = 15
@@ -151,7 +151,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("6_o6xl0")
 
-[node name="Position" type="Label" parent="CanvasLayer/Control"]
+[node name="Position" type="Label" parent="CanvasLayer/DebugMenu"]
 layout_mode = 0
 offset_left = 2.0
 offset_right = 42.0
@@ -160,7 +160,7 @@ scale = Vector2(2, 2)
 text = "Pos:"
 label_settings = ExtResource("6_tefeu")
 
-[node name="Velocity" type="Label" parent="CanvasLayer/Control"]
+[node name="Velocity" type="Label" parent="CanvasLayer/DebugMenu"]
 layout_mode = 0
 offset_left = 2.0
 offset_top = 32.0
@@ -170,7 +170,7 @@ scale = Vector2(2, 2)
 text = "Vel:"
 label_settings = ExtResource("6_tefeu")
 
-[node name="Rotation" type="Label" parent="CanvasLayer/Control"]
+[node name="Rotation" type="Label" parent="CanvasLayer/DebugMenu"]
 layout_mode = 0
 offset_left = 2.0
 offset_top = 64.0
@@ -180,18 +180,50 @@ scale = Vector2(2, 2)
 text = "Rot:"
 label_settings = ExtResource("6_tefeu")
 
-[node name="FPS" type="Label" parent="CanvasLayer/Control"]
+[node name="FPS" type="Label" parent="CanvasLayer/DebugMenu"]
 layout_mode = 0
-offset_left = 1030.0
-offset_top = 1.0
-offset_right = 1089.0
-offset_bottom = 17.0
+offset_left = 912.0
+offset_right = 952.0
+offset_bottom = 16.0
 scale = Vector2(2, 2)
-text = "XXX fps"
+text = "XXXXX"
 label_settings = ExtResource("6_tefeu")
 horizontal_alignment = 2
 
-[node name="CompTime" type="Label" parent="CanvasLayer/Control"]
+[node name="FPS" type="Label" parent="CanvasLayer/DebugMenu/FPS"]
+layout_mode = 0
+offset_left = 47.5
+offset_right = 71.5
+offset_bottom = 16.0
+text = "fps"
+label_settings = ExtResource("6_tefeu")
+horizontal_alignment = 2
+
+[node name="FPSAverage" type="Label" parent="CanvasLayer/DebugMenu"]
+layout_mode = 0
+offset_left = 848.0
+offset_top = 32.0
+offset_right = 920.0
+offset_bottom = 48.0
+scale = Vector2(2, 2)
+text = "XXXXX"
+label_settings = ExtResource("6_tefeu")
+horizontal_alignment = 2
+
+[node name="FPS" type="Label" parent="CanvasLayer/DebugMenu/FPSAverage"]
+layout_mode = 0
+offset_left = 80.0
+offset_right = 152.0
+offset_bottom = 16.0
+text = "fps (avg)"
+label_settings = ExtResource("6_tefeu")
+horizontal_alignment = 2
+
+[node name="ResetAverageFPS" type="Timer" parent="CanvasLayer/DebugMenu"]
+wait_time = 5.0
+autostart = true
+
+[node name="CompTime" type="Label" parent="CanvasLayer/DebugMenu"]
 layout_mode = 0
 offset_left = 2.0
 offset_top = 616.0
@@ -200,3 +232,5 @@ offset_bottom = 632.0
 scale = Vector2(2, 2)
 text = "Cmp. time:"
 label_settings = ExtResource("6_tefeu")
+
+[connection signal="timeout" from="CanvasLayer/DebugMenu/ResetAverageFPS" to="CanvasLayer/DebugMenu" method="ResetAverageFPS"]

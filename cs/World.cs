@@ -72,10 +72,21 @@ public partial class World : Node3D
 
 		chunkCompiler.wait();
 
-		if (WorldPosToChunk(player.GlobalPosition) == null)
-		{
-			CreateChunk((player.GlobalPosition / CHUNK_SCALAR).Floor());
-			chunkActivityThisFrame = true;
+		for (x = (int) (player.Position.X / Chunk.CHUNK_SIZE) - 1; x <= (int) (player.Position.X / Chunk.CHUNK_SIZE) + 1; x++) {
+			for (int y = -1; y <= 1; y++) {
+				for (int z = (int) (player.Position.Z / Chunk.CHUNK_SIZE) - 1; z <= (int) (player.Position.Z / Chunk.CHUNK_SIZE) + 1; z++) {
+					Vector3 pos = new Vector3(x, y, z);
+					int hash = Util.ChunkPosToChunkName(pos);
+					if (!chunkMap.ContainsKey(hash))
+					{
+						CreateChunk(pos);
+					}
+					if (!chunkMap[hash].generated)
+						chunkMap[hash].Generate();
+					if (chunkMap[hash].needsCompilation)
+						chunkMap[hash].Compile();
+				}
+			}
 		}
 
 		List<ICompilable> chunksToGenerate = new List<ICompilable>();
