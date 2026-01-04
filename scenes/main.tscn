@@ -100,6 +100,7 @@ directional_shadow_blend_splits = true
 [node name="LODManager" type="Node3D" parent="World"]
 
 [node name="Player" parent="World" instance=ExtResource("2_0xm2m")]
+process_priority = -1
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 16, 2)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
@@ -189,3 +190,13 @@ scale = Vector2(2, 2)
 text = "XXX fps"
 label_settings = ExtResource("6_tefeu")
 horizontal_alignment = 2
+
+[node name="CompTime" type="Label" parent="CanvasLayer/Control"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 616.0
+offset_right = 82.0
+offset_bottom = 632.0
+scale = Vector2(2, 2)
+text = "Cmp. time:"
+label_settings = ExtResource("6_tefeu")

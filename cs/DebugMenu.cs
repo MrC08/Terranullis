@@ -9,6 +9,7 @@ public partial class DebugMenu : Control
 	Label rot;
 	Label vel;
 	Label fps;
+	Label compTime;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -19,6 +20,7 @@ public partial class DebugMenu : Control
 		rot = (Label) GetNode("Rotation");
 		vel = (Label) GetNode("Velocity");
 		fps = (Label) GetNode("FPS");
+		compTime = (Label) GetNode("CompTime");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -28,5 +30,6 @@ public partial class DebugMenu : Control
 		rot.Text = "Rot: " + ((((Camera3D) player.GetNode("Camera3D")).GlobalRotationDegrees * 100).Round() / 100).ToString();
 		vel.Text = "Vel: " + ((player.Velocity * 100).Round() / 100).ToString();
 		fps.Text = Math.Round(Engine.GetFramesPerSecond()).ToString() + " fps";
+		compTime.Text = "Cmp. time: " + Math.Round(Chunk.AverageTime, 2).ToString() + "ms";
 	}
 }

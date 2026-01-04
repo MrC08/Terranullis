@@ -2,13 +2,13 @@ using Godot;
 
 public class BlockData
 {
-	public long[][] rawData;
-	public long[] staticData;
+	public ulong[][] rawData;
+	public ulong[] staticData;
 
 	public BlockData()
 	{
-		rawData = new long[Chunk.CHUNK_VSIZE / 16][];
-		staticData = new long[Chunk.CHUNK_VSIZE / 16];
+		rawData = new ulong[Chunk.CHUNK_VSIZE / 16][];
+		staticData = new ulong[Chunk.CHUNK_VSIZE / 16];
 
 		for (int i = 0; i < staticData.Length; i++)
 		{
@@ -16,28 +16,28 @@ public class BlockData
 		}
 	}
 
-	public long Get(int x, int y, int z)
+	public ulong Get(int x, int y, int z)
 	{
-		if (staticData[y / 16] == -1)
+		if (staticData[y / 16] == ulong.MaxValue)
 		{
 			return rawData[y / 16][x * Chunk.CHUNK_SIZE_SQ + y % 16 * Chunk.CHUNK_SIZE + z];
 		}
 		return staticData[y / 16];
 	}
 
-	public void Set(int x, int y, int z, long block)
+	public void Set(int x, int y, int z, ulong block)
 	{
-		if (staticData[y / 16] == -1)
+		if (staticData[y / 16] == ulong.MaxValue)
 		{
 			rawData[y / 16][x * Chunk.CHUNK_SIZE_SQ + y % 16 * Chunk.CHUNK_SIZE + z] = block;
 		} else
 		{
-			rawData[y / 16] = new long[Chunk.CHUNK_SIZE_SQ * Chunk.CHUNK_SIZE];
+			rawData[y / 16] = new ulong[Chunk.CHUNK_SIZE_SQ * Chunk.CHUNK_SIZE];
 			for (int i = 0; i < Chunk.CHUNK_SIZE_SQ * Chunk.CHUNK_SIZE; i++)
 				rawData[y / 16][i] = staticData[y / 16];
 
 			rawData[y / 16][x * Chunk.CHUNK_SIZE_SQ + y % 16 * Chunk.CHUNK_SIZE + z] = block;
-			staticData[y / 16] = -1;
+			staticData[y / 16] = ulong.MaxValue;
 		}
 	}
 
@@ -45,7 +45,7 @@ public class BlockData
 	{
 		for (int slice = 0; slice < staticData.Length; slice++)
 		{
-			if (staticData[slice] != -1)
+			if (staticData[slice] != ulong.MaxValue)
 				continue;
 			
 			bool same = rawData[slice] != null;

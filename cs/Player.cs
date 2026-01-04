@@ -72,7 +72,15 @@ public partial class Player : CharacterBody3D
 		}
 
 		MoveAndSlide();
+		UpdateRaycast(false);
+	}
+
+
+	public void UpdateRaycast(bool forceUpdate)
+	{
 		raycast.TargetPosition = camera.Transform.Basis.Y * 4f;
+		if (forceUpdate)
+			raycast.ForceRaycastUpdate();
 		Vector3 pos = (raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * -0.01f).Floor() + new Vector3(0.5f, 0.5f, 0.5f);
 
 		((Node3D) raycast.GetNode("Node3D")).GlobalPosition = pos;
@@ -104,10 +112,14 @@ public partial class Player : CharacterBody3D
 					flightSpeed *= 0.9f;
 				} else if (buttonEvent.ButtonIndex == MouseButton.Left)
 				{
-					world.SetBlock(raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * -0.01f, 0);
+					if (raycast.IsColliding())
+						world.SetBlock(raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * -0.01f, 0);
+						UpdateRaycast(true);
 				} else if (buttonEvent.ButtonIndex == MouseButton.Right)
 				{
-					world.SetBlock(raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * 0.01f, 1);
+					if (raycast.IsColliding())
+						world.SetBlock(raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * 0.01f, 2);
+						UpdateRaycast(true);
 				}
 			}
 		} else if (@event is InputEventKey keyEvent)

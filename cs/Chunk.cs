@@ -9,6 +9,9 @@ public partial class Chunk : Node3D, ICompilable
 	public const int CHUNK_VSIZE = 128;
 	public const float TEX_SIZE = 16f;
 
+	public static ulong AmountCompiled;
+	public static double AverageTime;
+
 	MeshInstance3D meshInstance;
 	CollisionShape3D collisionShape;
 	World world;
@@ -16,6 +19,7 @@ public partial class Chunk : Node3D, ICompilable
 	public BlockData blockData;
 	public bool needsCompilation;
 	public bool generated = false;
+	public Vector2 Position2D;
 
 	public int hash;
 
@@ -37,10 +41,12 @@ public partial class Chunk : Node3D, ICompilable
 
 		hash = Util.WorldPosToChunkName(GlobalPosition);
 		Name = hash.ToString();
+
+		Position2D = new Vector2(GlobalPosition.X, GlobalPosition.Z);
 	}
 
 
-	public long GetBlock(int x, int y, int z, long fallback)
+	public ulong GetBlock(int x, int y, int z, ulong fallback)
 	{
 		if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_VSIZE || z < 0 || z >= CHUNK_SIZE)
 			return world.GetBlock((int) GlobalPosition.X + x, (int) GlobalPosition.Y + y, (int) GlobalPosition.Z + z, fallback);
@@ -49,7 +55,7 @@ public partial class Chunk : Node3D, ICompilable
 	}
 
 
-	public long GetBlock(int x, int y, int z)
+	public ulong GetBlock(int x, int y, int z)
 	{
 		return GetBlock(x, y, z, 0);
 	}
@@ -59,7 +65,7 @@ public partial class Chunk : Node3D, ICompilable
 	private BlockData cachedBlockdataXN;
 	private BlockData cachedBlockdataZP;
 	private BlockData cachedBlockdataZN;
-	private long GetBlockDuringGeneration(int x, int y, int z)
+	private ulong GetBlockDuringGeneration(int x, int y, int z)
 	{
 		if (y < 0 || y >= CHUNK_VSIZE)
 		{
@@ -85,7 +91,7 @@ public partial class Chunk : Node3D, ICompilable
 	}
 
 
-	public void SetBlock(int x, int y, int z, long block)
+	public void SetBlock(int x, int y, int z, ulong block)
 	{
 		blockData.Set(x, y, z, block);
 	}
@@ -98,7 +104,7 @@ public partial class Chunk : Node3D, ICompilable
 
 	public bool IsBlockTransparentDuringGeneration(int x, int y, int z)
 	{
-		return GetBlockDuringGeneration(x, y, z) == 0;
+		return BlockTable.Get(GetBlockDuringGeneration(x, y, z)).IsTransparent;
 	}
 
 
@@ -178,22 +184,27 @@ public partial class Chunk : Node3D, ICompilable
 		Face tempFace = new Face();
 
 		for (int yChunk = 0; yChunk < CHUNK_VSIZE / 16; yChunk++) {
-			if (blockData.staticData[yChunk] == 0)
+			if (blockData.staticData[yChunk] != ulong.MaxValue)
 			{
-				continue;
+				if (BlockTable.Get(blockData.staticData[yChunk]).IsTransparent)
+					continue;
 			}
 
 			for (int y = yChunk * 16; y < yChunk * 16 + 16; y++) {
 				for (int x = 0; x < CHUNK_SIZE; x++) {
 					for (int z = 0; z < CHUNK_SIZE; z++) {
-						if (blockData.staticData[yChunk] == 1 && !(
-							x == 0 || x == CHUNK_SIZE - 1 || y % 16 == 0 || y % 16 == CHUNK_SIZE - 1 || z == 0 || z == CHUNK_SIZE - 1
-						))
-							continue;
+						if (blockData.staticData[yChunk] != ulong.MaxValue) {
+							if (!BlockTable.Get(blockData.staticData[yChunk]).IsTransparent && !(
+								x == 0 || x == CHUNK_SIZE - 1 || y % 16 == 0 || y % 16 == CHUNK_SIZE - 1 || z == 0 || z == CHUNK_SIZE - 1
+							))
+								continue;
+						}
 
-						if (GetBlock(x, y, z, 0) != 0) {
+						BlockType block = BlockTable.Get(GetBlock(x, y, z, 0));
+
+						if (!block.IsTransparent) {
 							if (IsBlockTransparentDuringGeneration(x - 1, y, z)) {
-								tempFace.Set(new Vector3I(x, y, z), 1, Face.Facing.LEFT);
+								tempFace.Set(new Vector3I(x, y, z), block.TextureWest, Face.Facing.WEST);
 								if (!xp.Continues(tempFace))
 								{
 									if (xp.Add(vertices, normals, tex, indices, index))
@@ -204,7 +215,7 @@ public partial class Chunk : Node3D, ICompilable
 								}
 							}
 							if (IsBlockTransparentDuringGeneration(x + 1, y, z)) {
-								tempFace.Set(new Vector3I(x, y, z), 1, Face.Facing.RIGHT);
+								tempFace.Set(new Vector3I(x, y, z), block.TextureEast, Face.Facing.EAST);
 								if (!xn.Continues(tempFace))
 								{
 									if (xn.Add(vertices, normals, tex, indices, index))
@@ -215,7 +226,7 @@ public partial class Chunk : Node3D, ICompilable
 								}
 							}
 							if (IsBlockTransparentDuringGeneration(x, y - 1, z)) {
-								tempFace.Set(new Vector3I(x, y, z), 1, Face.Facing.DOWN);
+								tempFace.Set(new Vector3I(x, y, z), block.TextureBottom, Face.Facing.DOWN);
 								if (!yn.Continues(tempFace))
 								{
 									if (yn.Add(vertices, normals, tex, indices, index))
@@ -226,7 +237,7 @@ public partial class Chunk : Node3D, ICompilable
 								}
 							}
 							if (IsBlockTransparentDuringGeneration(x, y + 1, z)) {
-								tempFace.Set(new Vector3I(x, y, z), 1, Face.Facing.UP);
+								tempFace.Set(new Vector3I(x, y, z), block.TextureTop, Face.Facing.UP);
 								if (!yp.Continues(tempFace))
 								{
 									if (yp.Add(vertices, normals, tex, indices, index))
@@ -237,7 +248,7 @@ public partial class Chunk : Node3D, ICompilable
 								}
 							}
 							if (IsBlockTransparentDuringGeneration(x, y, z - 1)) {
-								tempFace.Set(new Vector3I(x, y, z), 1, Face.Facing.FORWARD);
+								tempFace.Set(new Vector3I(x, y, z), block.TextureNorth, Face.Facing.NORTH);
 								if (!zn.Continues(tempFace))
 								{
 									if (zn.Add(vertices, normals, tex, indices, index))
@@ -248,7 +259,7 @@ public partial class Chunk : Node3D, ICompilable
 								}
 							}
 							if (IsBlockTransparentDuringGeneration(x, y, z + 1)) {
-								tempFace.Set(new Vector3I(x, y, z), 1, Face.Facing.BACK);
+								tempFace.Set(new Vector3I(x, y, z), block.TextureSouth, Face.Facing.SOUTH);
 								if (!zp.Continues(tempFace))
 								{
 									if (zp.Add(vertices, normals, tex, indices, index))
@@ -296,6 +307,9 @@ public partial class Chunk : Node3D, ICompilable
 		needsCompilation = false;
 
 		double end_t = Time.GetTicksUsec();
+		AmountCompiled++;
+		AverageTime *= ((double) AmountCompiled - 1) / AmountCompiled;
+		AverageTime += (end_t - t) * 0.001 / AmountCompiled;
 		
 		//GD.Print("Took msec: ", (end_t - t) * 0.001);
 		return (end_t - t) * 0.001;

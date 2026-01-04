@@ -20,7 +20,7 @@ public partial class World : Node3D
 
 	public int primaryRenderDistance = 16;
 	public int primaryLoadDistance = 20;
-	public int primaryRenderLODDistance = 24;
+	public int primaryRenderLODDistance = 20;
 
 	private int tick = 0;
 	private double chunksCompiled = 0;
@@ -77,10 +77,6 @@ public partial class World : Node3D
 			CreateChunk((player.GlobalPosition / CHUNK_SCALAR).Floor());
 			chunkActivityThisFrame = true;
 		}
-		if (!WorldPosToChunk(player.GlobalPosition).generated)
-			WorldPosToChunk(player.GlobalPosition).Generate();
-		if (WorldPosToChunk(player.GlobalPosition).needsCompilation)
-			WorldPosToChunk(player.GlobalPosition).Compile();
 
 		List<ICompilable> chunksToGenerate = new List<ICompilable>();
 		List<ICompilable> chunksToCompile = new List<ICompilable>();
@@ -89,10 +85,10 @@ public partial class World : Node3D
 		foreach (int hash in hashes)
 		{
 			Chunk c = chunkMap[hash];
-			if (new Vector2(c.GlobalPosition.X, c.GlobalPosition.Z).DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) > Math.Pow((primaryRenderDistance + 1) * 16, 2))
+			if (c.Position2D.DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) > Math.Pow((primaryRenderDistance + 1) * 16, 2))
 			{
 				c.Visible = false;
-				if (new Vector2(c.GlobalPosition.X, c.GlobalPosition.Z).DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) > Math.Pow(primaryLoadDistance * 16, 2))
+				if (c.Position2D.DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) > Math.Pow(primaryLoadDistance * 16, 2))
 				{
 					c.QueueFree();
 					chunkMap.Remove(c.hash);
@@ -106,11 +102,19 @@ public partial class World : Node3D
 
 				if (!c.generated)
 				{
-					chunksToGenerate.Add(c);
+					if (c.Position2D.DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) < 16)
+						c.Generate();
+					else
+						chunksToGenerate.Add(c);
+
 					chunkActivityThisFrame = true;
 				} else if (c.needsCompilation)
 				{
-					chunksToCompile.Add(c);
+					if (c.Position2D.DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) < 16)
+						c.Compile();
+					else
+						chunksToCompile.Add(c);
+
 					chunkActivityThisFrame = true;
 				}
 			}
@@ -174,7 +178,7 @@ public partial class World : Node3D
 	}
 
 
-	public long GetBlock(int x, int y, int z, long fallback)
+	public ulong GetBlock(int x, int y, int z, ulong fallback)
 	{
 		if (y > 255 || y < -128)
 			return fallback;
@@ -232,7 +236,7 @@ public partial class World : Node3D
 			chunk.needsCompilation = true;
 	}
 
-	public bool SetBlock(int gx, int gy, int gz, long block)
+	public bool SetBlock(int gx, int gy, int gz, ulong block)
 	{
 		Chunk chunk = tryToGetChunkFromBlockCoords(gx, gy, gz);
 		if (chunk == null)
@@ -269,7 +273,7 @@ public partial class World : Node3D
 		return true;
 	}
 
-	public bool SetBlock(Vector3 v, long block)
+	public bool SetBlock(Vector3 v, ulong block)
 	{
 		return SetBlock((int) Math.Floor(v.X), (int) Math.Floor(v.Y), (int) Math.Floor(v.Z), block);
 	}

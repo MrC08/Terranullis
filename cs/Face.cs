@@ -5,28 +5,28 @@ public struct Face
 {
 	public enum Facing
 	{
-		UP, DOWN, LEFT, RIGHT, BACK, FORWARD, NULL
+		UP, DOWN, WEST, EAST, SOUTH, NORTH, NULL
 	}
 
 	private const float e0 = -0.0002f;
 	private const float e1 = 1.0002f;
 
 	public Vector3I position;
-	public int texture;
+	public ushort texture;
 	public Facing facing;
 	public int continuation;
 
 	public Face()
 	{
 		position = Vector3I.MinValue;
-		texture = -1;
+		texture = ushort.MaxValue;
 		facing = Facing.NULL;
 		continuation = 1;
 	}
 
 	public bool Add(List<Vector3> vertices, List<Vector3> normals, List<float> tex, List<int> indices, int index)
 	{
-		if (facing == Facing.LEFT)
+		if (facing == Facing.WEST)
 		{
 			vertices.Add(new Vector3(position.X, position.Y + e0, position.Z + e0));
 			vertices.Add(new Vector3(position.X, position.Y + e0, position.Z + continuation * e1));
@@ -52,7 +52,7 @@ public struct Face
 
 			continuation = 1;
 			return true;
-		} else if (facing == Facing.RIGHT)
+		} else if (facing == Facing.EAST)
 		{
 			vertices.Add(new Vector3(position.X + 1f, position.Y + e0, position.Z + e0));
 			vertices.Add(new Vector3(position.X + 1f, position.Y + e0, position.Z + continuation * e1));
@@ -85,7 +85,6 @@ public struct Face
 			vertices.Add(new Vector3(position.X + e0, position.Y, position.Z + continuation * e1));
 			vertices.Add(new Vector3(position.X + e1, position.Y, position.Z + continuation * e1));
 
-			float texture = 3;
 			tex.Add(0.9999f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
@@ -112,7 +111,6 @@ public struct Face
 			vertices.Add(new Vector3(position.X + e0, position.Y + 1f, position.Z + continuation * e1));
 			vertices.Add(new Vector3(position.X + e1, position.Y + 1f, position.Z + continuation * e1));
 
-			float texture = 2;
 			tex.Add(0.0001f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
@@ -132,14 +130,13 @@ public struct Face
 
 			continuation = 1;
 			return true;
-		} else if (facing == Facing.FORWARD)
+		} else if (facing == Facing.NORTH)
 		{
 			vertices.Add(new Vector3(position.X + e0, position.Y + e0, position.Z));
 			vertices.Add(new Vector3(position.X + continuation * e1, position.Y + e0, position.Z));
 			vertices.Add(new Vector3(position.X + e0, position.Y + e1, position.Z));
 			vertices.Add(new Vector3(position.X + continuation * e1, position.Y + e1, position.Z));
 
-			float texture = 1;
 			tex.Add(0.9999f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
@@ -159,14 +156,13 @@ public struct Face
 
 			continuation = 1;
 			return true;
-		} else if (facing == Facing.BACK)
+		} else if (facing == Facing.SOUTH)
 		{
 			vertices.Add(new Vector3(position.X + e0, position.Y + e0, position.Z + 1f));
 			vertices.Add(new Vector3(position.X + continuation * e1, position.Y + e0, position.Z + 1f));
 			vertices.Add(new Vector3(position.X + e0, position.Y + e1, position.Z + 1f));
 			vertices.Add(new Vector3(position.X + continuation * e1, position.Y + e1, position.Z + 1f));
 
-			float texture = 1;
 			tex.Add(0.0001f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add((texture + 1) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add(texture / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
@@ -191,7 +187,7 @@ public struct Face
 		return false;
 	}
 
-	public void Set(Vector3I position, int texture, Facing facing)
+	public void Set(Vector3I position, ushort texture, Facing facing)
 	{
 		this.position = position;
 		this.texture = texture;
@@ -211,7 +207,7 @@ public struct Face
 		if (other.texture != texture || other.facing != facing)
 			return false;
 		
-		if (facing == Facing.BACK || facing == Facing.FORWARD)
+		if (facing == Facing.SOUTH || facing == Facing.NORTH)
 			return (
 				other.position.X == position.X + continuation &&
 				other.position.Y == position.Y &&
