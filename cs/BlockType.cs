@@ -5,6 +5,7 @@ public struct BlockType
 	public string Name;
 
 	public bool IsTransparent;
+	public bool IsInvisible;
 
 	public ushort TextureTop;
 	public ushort TextureBottom;
@@ -20,12 +21,21 @@ public struct BlockType
 		this.Name = Name;
 
 		IsTransparent = false;
+		IsInvisible = false;
 		SetAllTextures(0);
 	}
 
 	public BlockType SetTransparency(bool IsTransparent)
 	{
 		this.IsTransparent = IsTransparent;
+		return this;
+	}
+
+	public BlockType SetInvisibility(bool IsInvisible)
+	{
+		this.IsInvisible = IsInvisible;
+		if (IsInvisible)
+			this.IsTransparent = true;
 		return this;
 	}
 
@@ -56,5 +66,28 @@ public struct BlockType
 	public readonly ulong Compress()
 	{
 		return ID;
+	}
+
+	public override readonly bool Equals(object obj)
+	{
+		if (obj == null)
+			return false;
+
+		return Compress() == ((BlockType) obj).Compress();
+	}
+
+	public static bool operator ==(BlockType left, BlockType right)
+	{
+		return left.Equals(right);
+	}
+
+	public static bool operator !=(BlockType left, BlockType right)
+	{
+		return !(left == right);
+	}
+
+	public override int GetHashCode()
+	{
+		throw new System.NotImplementedException();
 	}
 }

@@ -3,15 +3,7 @@ render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_sc
 
 
 uniform sampler2D texture_albedo : source_color, filter_nearest, repeat_enable;
-uniform float alpha_scissor_threshold : hint_range(0.0, 1.0, 0.001);
-
-uniform float roughness : hint_range(0.0, 1.0);
-uniform sampler2D texture_metallic : hint_default_white, filter_nearest, repeat_enable;
-uniform vec4 metallic_texture_channel;
-uniform sampler2D texture_roughness : hint_roughness_r, filter_nearest, repeat_enable;
-
-uniform float specular : hint_range(0.0, 1.0, 0.01);
-uniform float metallic : hint_range(0.0, 1.0, 0.01);
+uniform sampler2D smoothness_map : source_color, filter_nearest, repeat_enable;
 
 uniform vec3 sky_color : source_color;
 
@@ -86,7 +78,7 @@ void fragment() {
 	}
 
 	if (!lod && dist < 32.0) {
-		DEPTH = FRAGCOORD.z - 0.0000001 * vertex_id_interp;
+		DEPTH = FRAGCOORD.z;
 	} else {
 		DEPTH = FRAGCOORD.z;
 	}
@@ -95,19 +87,20 @@ void fragment() {
 	vec4 albedo_tex = texture(texture_albedo, uv);
 	ALBEDO = albedo_tex.rgb;
 
-	float metallic_tex = dot(texture(texture_metallic, uv), metallic_texture_channel);
-	METALLIC = metallic_tex * metallic;
-	SPECULAR = specular;
-
-	vec4 roughness_texture_channel = vec4(1.0, 0.0, 0.0, 0.0);
-	float roughness_tex = dot(texture(texture_roughness, uv), roughness_texture_channel);
-	ROUGHNESS = roughness_tex * roughness;
 	ALPHA *= albedo_tex.a;
-	ALPHA_SCISSOR_THRESHOLD = alpha_scissor_threshold;
+	ALPHA_SCISSOR_THRESHOLD = 0.5;
 
+	float smoothness = texture(smoothness_map, uv).r;
+	ROUGHNESS = 1.0 - smoothness;
+	SPECULAR = smoothness;
+	METALLIC = smoothness;
 
 	// Fade with distance
 	ALBEDO.rgb = mix(ALBEDO.rgb, sky_color, pow(depth_normalized, 1.25));
+
+	if (lod) {
+		ALPHA = 1.0;
+	}
 
 
 	// Pixelate shadows; credit: https://forum.godotengine.org/t/shader-for-pixelated-shadows-3d/115691/7

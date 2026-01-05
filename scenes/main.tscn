@@ -9,16 +9,16 @@
 [ext_resource type="LabelSettings" uid="uid://d0dw7236n1ebx" path="res://res/label_settings.tres" id="6_tefeu"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_0wfyh"]
-frequency = 0.05
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_sugp2"]
 frequency = 0.0125
 
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_sugp2"]
+frequency = 0.004
+
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_jyhfs"]
-frequency = 0.0063
+frequency = 0.003
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_tbgi4"]
-frequency = 0.0032
+frequency = 0.0005
 
 [sub_resource type="Gradient" id="Gradient_tipki"]
 offsets = PackedFloat32Array(0.92156863, 1)
@@ -46,6 +46,7 @@ sky_material = SubResource("ShaderMaterial_tefeu")
 background_mode = 2
 sky = SubResource("Sky_h2yge")
 tonemap_mode = 2
+ssr_enabled = true
 ssao_enabled = true
 ssao_radius = 1.34
 ssao_intensity = 3.95
@@ -101,9 +102,10 @@ directional_shadow_blend_splits = true
 
 [node name="Player" parent="World" instance=ExtResource("2_0xm2m")]
 process_priority = -1
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 16, 2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 256, 2)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+follow_viewport_enabled = true
 
 [node name="ColorRect3" type="ColorRect" parent="CanvasLayer"]
 texture_filter = 1
@@ -151,70 +153,64 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("6_o6xl0")
 
-[node name="Position" type="Label" parent="CanvasLayer/DebugMenu"]
-layout_mode = 0
-offset_left = 2.0
-offset_right = 42.0
-offset_bottom = 16.0
+[node name="TopLeft" type="VBoxContainer" parent="CanvasLayer/DebugMenu"]
+layout_mode = 1
+offset_right = 40.0
+offset_bottom = 40.0
 scale = Vector2(2, 2)
+
+[node name="Position" type="Label" parent="CanvasLayer/DebugMenu/TopLeft"]
+layout_mode = 2
 text = "Pos:"
 label_settings = ExtResource("6_tefeu")
 
-[node name="Velocity" type="Label" parent="CanvasLayer/DebugMenu"]
-layout_mode = 0
-offset_left = 2.0
-offset_top = 32.0
-offset_right = 42.0
-offset_bottom = 48.0
-scale = Vector2(2, 2)
+[node name="Velocity" type="Label" parent="CanvasLayer/DebugMenu/TopLeft"]
+layout_mode = 2
 text = "Vel:"
 label_settings = ExtResource("6_tefeu")
 
-[node name="Rotation" type="Label" parent="CanvasLayer/DebugMenu"]
-layout_mode = 0
-offset_left = 2.0
-offset_top = 64.0
-offset_right = 42.0
-offset_bottom = 80.0
-scale = Vector2(2, 2)
+[node name="Rotation" type="Label" parent="CanvasLayer/DebugMenu/TopLeft"]
+layout_mode = 2
 text = "Rot:"
 label_settings = ExtResource("6_tefeu")
 
-[node name="FPS" type="Label" parent="CanvasLayer/DebugMenu"]
-layout_mode = 0
-offset_left = 912.0
-offset_right = 952.0
-offset_bottom = 16.0
+[node name="TopRight" type="VBoxContainer" parent="CanvasLayer/DebugMenu"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -116.0
+offset_bottom = 40.0
+grow_horizontal = 0
 scale = Vector2(2, 2)
+pivot_offset = Vector2(116, 0)
+
+[node name="FPS" type="HBoxContainer" parent="CanvasLayer/DebugMenu/TopRight"]
+layout_mode = 2
+
+[node name="Counter" type="Label" parent="CanvasLayer/DebugMenu/TopRight/FPS"]
+layout_mode = 2
 text = "XXXXX"
 label_settings = ExtResource("6_tefeu")
 horizontal_alignment = 2
 
-[node name="FPS" type="Label" parent="CanvasLayer/DebugMenu/FPS"]
-layout_mode = 0
-offset_left = 47.5
-offset_right = 71.5
-offset_bottom = 16.0
+[node name="Text" type="Label" parent="CanvasLayer/DebugMenu/TopRight/FPS"]
+layout_mode = 2
 text = "fps"
 label_settings = ExtResource("6_tefeu")
 horizontal_alignment = 2
 
-[node name="FPSAverage" type="Label" parent="CanvasLayer/DebugMenu"]
-layout_mode = 0
-offset_left = 848.0
-offset_top = 32.0
-offset_right = 920.0
-offset_bottom = 48.0
-scale = Vector2(2, 2)
+[node name="AverageFPS" type="HBoxContainer" parent="CanvasLayer/DebugMenu/TopRight"]
+layout_mode = 2
+
+[node name="Counter" type="Label" parent="CanvasLayer/DebugMenu/TopRight/AverageFPS"]
+layout_mode = 2
 text = "XXXXX"
 label_settings = ExtResource("6_tefeu")
 horizontal_alignment = 2
 
-[node name="FPS" type="Label" parent="CanvasLayer/DebugMenu/FPSAverage"]
-layout_mode = 0
-offset_left = 80.0
-offset_right = 152.0
-offset_bottom = 16.0
+[node name="Text" type="Label" parent="CanvasLayer/DebugMenu/TopRight/AverageFPS"]
+layout_mode = 2
 text = "fps (avg)"
 label_settings = ExtResource("6_tefeu")
 horizontal_alignment = 2
@@ -222,14 +218,18 @@ horizontal_alignment = 2
 [node name="ResetAverageFPS" type="Timer" parent="CanvasLayer/DebugMenu"]
 wait_time = 5.0
 autostart = true
+ignore_time_scale = true
 
 [node name="CompTime" type="Label" parent="CanvasLayer/DebugMenu"]
-layout_mode = 0
-offset_left = 2.0
-offset_top = 616.0
-offset_right = 82.0
-offset_bottom = 632.0
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -16.0
+offset_right = 80.0
+grow_vertical = 0
 scale = Vector2(2, 2)
+pivot_offset = Vector2(0, 22)
 text = "Cmp. time:"
 label_settings = ExtResource("6_tefeu")
 

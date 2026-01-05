@@ -20,7 +20,7 @@ public partial class World : Node3D
 
 	public int primaryRenderDistance = 16;
 	public int primaryLoadDistance = 20;
-	public int primaryRenderLODDistance = 20;
+	public int primaryRenderLODDistance = 24;
 
 	private int tick = 0;
 	private double chunksCompiled = 0;
@@ -84,7 +84,7 @@ public partial class World : Node3D
 					if (!chunkMap[hash].generated)
 						chunkMap[hash].Generate();
 					if (chunkMap[hash].needsCompilation)
-						chunkMap[hash].Compile();
+						chunkMap[hash].Compile(true);
 				}
 			}
 		}
@@ -96,16 +96,18 @@ public partial class World : Node3D
 		foreach (int hash in hashes)
 		{
 			Chunk c = chunkMap[hash];
-			if (c.Position2D.DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) > Math.Pow((primaryRenderDistance + 1) * 16, 2))
+			float dist_sq = c.Position2D.DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z));
+
+			if (dist_sq > Math.Pow((primaryRenderDistance + 1) * 16, 2))
 			{
 				c.Visible = false;
-				if (c.Position2D.DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) > Math.Pow(primaryLoadDistance * 16, 2))
+				if (dist_sq > Math.Pow(primaryLoadDistance * 16, 2))
 				{
 					c.QueueFree();
 					chunkMap.Remove(c.hash);
 				} else if (!c.generated)
 				{
-					chunksToGenerate.Add(c);
+					chunksToGenerate.Insert((int) Math.Min(dist_sq / 8, chunksToGenerate.Count), c);
 					chunkActivityThisFrame = true;
 				}
 			} else {
@@ -113,18 +115,18 @@ public partial class World : Node3D
 
 				if (!c.generated)
 				{
-					if (c.Position2D.DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) < 16)
+					if (dist_sq < 16)
 						c.Generate();
 					else
-						chunksToGenerate.Add(c);
+						chunksToGenerate.Insert((int) Math.Min(dist_sq / 8, chunksToGenerate.Count), c);
 
 					chunkActivityThisFrame = true;
 				} else if (c.needsCompilation)
 				{
-					if (c.Position2D.DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) < 16)
+					if (dist_sq < 16)
 						c.Compile();
 					else
-						chunksToCompile.Add(c);
+						chunksToCompile.Insert((int) Math.Min(dist_sq / 8, chunksToCompile.Count), c);
 
 					chunkActivityThisFrame = true;
 				}
@@ -301,7 +303,7 @@ public partial class World : Node3D
 	}
 
 
-	public void CreateChunk(Vector3 chunkPos)
+	public Chunk CreateChunk(Vector3 chunkPos)
 	{
 		int hash = Util.ChunkPosToChunkName(chunkPos);
 
@@ -311,5 +313,7 @@ public partial class World : Node3D
 
 		c.GlobalPosition = chunkPos * CHUNK_SCALAR;
 		c.Init(this);
+
+		return c;
 	}
 }

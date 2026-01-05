@@ -100,11 +100,15 @@ public partial class Chunk : Node3D, ICompilable
 		return GetBlock(x, y, z) == 0;
 	}
 
-	public bool IsBlockTransparentDuringGeneration(int x, int y, int z)
+	public bool IsBlockTransparentDuringGeneration(int x, int y, int z, BlockType block)
 	{
-		return BlockTable.Get(GetBlockDuringGeneration(x, y, z)).IsTransparent;
+		BlockType otherBlock = BlockTable.Get(GetBlockDuringGeneration(x, y, z));
+		if (otherBlock.IsInvisible)
+			return true;
+		if (otherBlock.IsTransparent)
+			return !block.Equals(otherBlock);
+		return false;
 	}
-
 
 	public void ThreadedGenerate()
 	{
@@ -112,10 +116,9 @@ public partial class Chunk : Node3D, ICompilable
 		Generate();
 	}
 
-
 	public void Generate()
 	{
-		int[] heightmap = Generator.GenerateHeightmap(GlobalPosition, CHUNK_SIZE, CHUNK_SIZE);
+		int[] heightmap = Generator.GenerateHeightmap(GlobalPosition, CHUNK_SIZE, CHUNK_SIZE, false);
 
 		for (int x = 0; x < CHUNK_SIZE; x++)
 		{
@@ -123,10 +126,25 @@ public partial class Chunk : Node3D, ICompilable
 			{
 				int height = heightmap[x + z * CHUNK_SIZE];
 
-				for (int y = Math.Min(height - (int) GlobalPosition.Y, CHUNK_VSIZE - 1); y >= 0; y--)
+				int topGenerate = Math.Min(height - (int) GlobalPosition.Y, CHUNK_VSIZE - 1);
+
+				for (int y = topGenerate; y >= 0; y--)
 				{
-					SetBlock(x, y, z, 1);
+					if (y == topGenerate && topGenerate == height - (int) GlobalPosition.Y)
+					{
+						SetBlock(x, y, z, 1);
+					} else {
+						SetBlock(x, y, z, 2);
+					}
 				}
+
+				/*if (GlobalPosition.Y <= -1)
+				{
+					for (int y = CHUNK_VSIZE - 1; y > topGenerate; y--)
+					{
+						SetBlock(x, y, z, 4);
+					}
+				}*/
 			}		
 		}
 
@@ -142,8 +160,9 @@ public partial class Chunk : Node3D, ICompilable
 		Compile();
 	}
 
+	public double Compile() { return Compile(true); }
 
-	public double Compile()
+	public double Compile(bool forceCompile)
 	{
 		double t = Time.GetTicksUsec();
 
@@ -163,15 +182,23 @@ public partial class Chunk : Node3D, ICompilable
 		Chunk chunk = world.WorldPosToChunk(GlobalPosition + new Vector3(16, 0, 0));
 		if (chunk != null)
 			cachedBlockdataXP = chunk.blockData;
+		else if (!forceCompile)
+			return -1;
 		chunk = world.WorldPosToChunk(GlobalPosition + new Vector3(-16, 0, 0));
 		if (chunk != null)
 			cachedBlockdataXN = chunk.blockData;
+		else if (!forceCompile)
+			return -1;
 		chunk = world.WorldPosToChunk(GlobalPosition + new Vector3(0, 0, 16));
 		if (chunk != null)
 			cachedBlockdataZP = chunk.blockData;
+		else if (!forceCompile)
+			return -1;
 		chunk = world.WorldPosToChunk(GlobalPosition + new Vector3(0, 0, -16));
 		if (chunk != null)
 			cachedBlockdataZN = chunk.blockData;
+		else if (!forceCompile)
+			return -1;
 		
 		Face xp = new Face();
 		Face xn = new Face();
@@ -184,24 +211,22 @@ public partial class Chunk : Node3D, ICompilable
 		for (int yChunk = 0; yChunk < CHUNK_VSIZE / 16; yChunk++) {
 			if (blockData.staticData[yChunk] != ulong.MaxValue)
 			{
-				if (BlockTable.Get(blockData.staticData[yChunk]).IsTransparent)
+				if (BlockTable.Get(blockData.staticData[yChunk]).IsInvisible)
 					continue;
 			}
 
 			for (int y = yChunk * 16; y < yChunk * 16 + 16; y++) {
 				for (int x = 0; x < CHUNK_SIZE; x++) {
 					for (int z = 0; z < CHUNK_SIZE; z++) {
-						if (blockData.staticData[yChunk] != ulong.MaxValue) {
-							if (!BlockTable.Get(blockData.staticData[yChunk]).IsTransparent && !(
-								x == 0 || x == CHUNK_SIZE - 1 || y % 16 == 0 || y % 16 == CHUNK_SIZE - 1 || z == 0 || z == CHUNK_SIZE - 1
-							))
-								continue;
-						}
+						if (blockData.staticData[yChunk] != ulong.MaxValue && !(
+							x == 0 || x == CHUNK_SIZE - 1 || y % 16 == 0 || y % 16 == CHUNK_SIZE - 1 || z == 0 || z == CHUNK_SIZE - 1
+						))
+							continue;
 
 						BlockType block = BlockTable.Get(GetBlock(x, y, z, 0));
 
-						if (!block.IsTransparent) {
-							if (IsBlockTransparentDuringGeneration(x - 1, y, z)) {
+						if (!block.IsInvisible) {
+							if (IsBlockTransparentDuringGeneration(x - 1, y, z, block)) {
 								tempFace.Set(new Vector3I(x, y, z), block.TextureWest, Face.Facing.WEST);
 								if (!xp.Continues(tempFace))
 								{
@@ -212,7 +237,7 @@ public partial class Chunk : Node3D, ICompilable
 									xp.continuation++;
 								}
 							}
-							if (IsBlockTransparentDuringGeneration(x + 1, y, z)) {
+							if (IsBlockTransparentDuringGeneration(x + 1, y, z, block)) {
 								tempFace.Set(new Vector3I(x, y, z), block.TextureEast, Face.Facing.EAST);
 								if (!xn.Continues(tempFace))
 								{
@@ -223,7 +248,7 @@ public partial class Chunk : Node3D, ICompilable
 									xn.continuation++;
 								}
 							}
-							if (IsBlockTransparentDuringGeneration(x, y - 1, z)) {
+							if (IsBlockTransparentDuringGeneration(x, y - 1, z, block)) {
 								tempFace.Set(new Vector3I(x, y, z), block.TextureBottom, Face.Facing.DOWN);
 								if (!yn.Continues(tempFace))
 								{
@@ -234,7 +259,7 @@ public partial class Chunk : Node3D, ICompilable
 									yn.continuation++;
 								}
 							}
-							if (IsBlockTransparentDuringGeneration(x, y + 1, z)) {
+							if (IsBlockTransparentDuringGeneration(x, y + 1, z, block)) {
 								tempFace.Set(new Vector3I(x, y, z), block.TextureTop, Face.Facing.UP);
 								if (!yp.Continues(tempFace))
 								{
@@ -245,7 +270,7 @@ public partial class Chunk : Node3D, ICompilable
 									yp.continuation++;
 								}
 							}
-							if (IsBlockTransparentDuringGeneration(x, y, z - 1)) {
+							if (IsBlockTransparentDuringGeneration(x, y, z - 1, block)) {
 								tempFace.Set(new Vector3I(x, y, z), block.TextureNorth, Face.Facing.NORTH);
 								if (!zn.Continues(tempFace))
 								{
@@ -256,7 +281,7 @@ public partial class Chunk : Node3D, ICompilable
 									zn.continuation++;
 								}
 							}
-							if (IsBlockTransparentDuringGeneration(x, y, z + 1)) {
+							if (IsBlockTransparentDuringGeneration(x, y, z + 1, block)) {
 								tempFace.Set(new Vector3I(x, y, z), block.TextureSouth, Face.Facing.SOUTH);
 								if (!zp.Continues(tempFace))
 								{
@@ -300,6 +325,10 @@ public partial class Chunk : Node3D, ICompilable
 			}
 			
 			((ConcavePolygonShape3D) collisionShape.Shape).SetFaces(rawFaces.ToArray());
+		
+			ArrayMesh newMesh = new ArrayMesh();
+			newMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
+			new Callable(this, nameof(SetNewMesh)).CallDeferred(newMesh);
 		}
 
 		needsCompilation = false;
@@ -311,5 +340,10 @@ public partial class Chunk : Node3D, ICompilable
 		
 		//GD.Print("Took msec: ", (end_t - t) * 0.001);
 		return (end_t - t) * 0.001;
+	}
+
+	public void SetNewMesh(ArrayMesh newMesh)
+	{
+		meshInstance.Mesh = newMesh;
 	}
 }

@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Godot;
 
 public class ChunkCompiler
 {
-	const int THREAD_COUNT = 50;
+	const int THREAD_COUNT = 32;
 
 	GodotThread[] threads;
 
@@ -31,7 +29,6 @@ public class ChunkCompiler
 			threads[i].Start(new Callable((Node3D) chunk, nameof(chunk.ThreadedGenerate)));
 			threadsRemaining--;
 		}	
-
 
 		for (int i = THREAD_COUNT - threadsRemaining; i < Math.Min(chunksToCompile.Count, threadsRemaining); i++)
 		{

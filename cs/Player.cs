@@ -3,14 +3,16 @@ using Godot;
 
 public partial class Player : CharacterBody3D
 {
+	const float ACCELERATION = 60f;
 	const float SPEED = 5f;
 	const float JUMP_VELOCITY = 7f;
+	const float TERMINAL_VELOCITY = 50f;
 
 	Camera3D camera;
 	RayCast3D raycast;
 	World world;
 
-	bool flying = true;
+	bool flying = false;
 	float flightSpeed = SPEED;
 
 
@@ -28,27 +30,28 @@ public partial class Player : CharacterBody3D
 	{
 		float deltaf = (float) Math.Clamp(delta, 0, 1);
 
+		Vector3 acceleration = Vector3.Zero;
+
 		if (flying)
 		{
 			if (Input.IsActionPressed("crouch"))
 			{
-				Velocity = new Vector3(Velocity.X, -flightSpeed, Velocity.Z);
+				acceleration = acceleration with {Y = -flightSpeed};
 			} else if (Input.IsActionPressed("jump"))
 			{
-				Velocity = new Vector3(Velocity.X, flightSpeed, Velocity.Z);
+				acceleration = acceleration with {Y = flightSpeed};
 			} else
 			{
-				//Velocity = new Vector3(Velocity.X, Mathf.MoveToward(Velocity.Y, 0, flightSpeed), Velocity.Z);
-				Velocity = new Vector3(Velocity.X, 0, Velocity.Z);
+				acceleration = acceleration with {Y = 0f};
 			}
 		} else
 		{
 			if (!IsOnFloor())
 			{
-				Velocity += GetGravity() * deltaf;
+				acceleration = GetGravity() * deltaf;
 			} else if (Input.IsActionJustPressed("jump"))
 			{
-				Velocity = new Vector3(Velocity.X, JUMP_VELOCITY, Velocity.Z);
+				acceleration = acceleration with {Y = JUMP_VELOCITY};
 			}
 		}
 
@@ -57,19 +60,30 @@ public partial class Player : CharacterBody3D
 
 		if (!direction.IsZeroApprox())
 		{
-			Velocity = new Vector3(
-				direction.X * (flying ? flightSpeed : SPEED),
-				Velocity.Y,
-				direction.Z * (flying ? flightSpeed : SPEED)
-			);
+			if (!flying)
+				acceleration = (direction * ACCELERATION * deltaf) with {Y = acceleration.Y};
+			else
+				acceleration = (direction * flightSpeed) with {Y = acceleration.Y};
+		}
+		
+		if (!flying) {
+			acceleration += (-Velocity * 0.2f) with {Y = 0};
+
+			Velocity += acceleration;
+
+			if ((Velocity with {Y = 0f}).Length() > (flying ? flightSpeed : SPEED)) {
+				float yVel = Velocity.Y;
+				Velocity = ((Velocity with {Y = 0f}).Normalized() * (flying ? flightSpeed : SPEED)) with {Y = yVel};
+			}
+			if (Velocity.Y < -TERMINAL_VELOCITY)
+				Velocity = Velocity with {Y = -TERMINAL_VELOCITY};
 		} else
 		{
-			Velocity = new Vector3(
-				Velocity.X * 0.5f * deltaf,
-				Velocity.Y,
-				Velocity.Z * 0.5f * deltaf
-			);
+			Velocity = acceleration;
 		}
+
+		if (Velocity.IsZeroApprox())
+			Velocity = Vector3.Zero;
 
 		MoveAndSlide();
 		UpdateRaycast(false);
@@ -133,6 +147,9 @@ public partial class Player : CharacterBody3D
 					DisplayServer.WindowGetMode() == DisplayServer.WindowMode.Fullscreen ?
 					DisplayServer.WindowMode.Windowed :
 					DisplayServer.WindowMode.Fullscreen);
+			} else if (Input.IsActionJustPressed("tab"))
+			{
+				flying = !flying;
 			}
 		}
 	}

@@ -20,11 +20,11 @@ public partial class DebugMenu : Control
 	{
 		player = (Player) GetParent().GetParent().GetNode("World/Player");
 
-		pos = (Label) GetNode("Position");
-		rot = (Label) GetNode("Rotation");
-		vel = (Label) GetNode("Velocity");
-		fps = (Label) GetNode("FPS");
-		fpsAvg = (Label) GetNode("FPSAverage");
+		pos = (Label) GetNode("TopLeft/Position");
+		rot = (Label) GetNode("TopLeft/Rotation");
+		vel = (Label) GetNode("TopLeft/Velocity");
+		fps = (Label) GetNode("TopRight/FPS/Counter");
+		fpsAvg = (Label) GetNode("TopRight/AverageFPS/Counter");
 		compTime = (Label) GetNode("CompTime");
 	}
 
