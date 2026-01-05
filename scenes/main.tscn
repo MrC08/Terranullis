@@ -1,10 +1,11 @@
-[gd_scene load_steps=23 format=3 uid="uid://cs5hhep0lin7l"]
+[gd_scene load_steps=24 format=3 uid="uid://cs5hhep0lin7l"]
 
 [ext_resource type="Script" uid="uid://cajiepfijw2j0" path="res://cs/World.cs" id="1_sugp2"]
 [ext_resource type="PackedScene" uid="uid://dwuwtf8io6h4p" path="res://scenes/player.tscn" id="2_0xm2m"]
 [ext_resource type="Script" uid="uid://mvfk5tclye52" path="res://cs/SkyManager.cs" id="2_jyhfs"]
 [ext_resource type="Shader" uid="uid://clch5n05bh0qk" path="res://res/sky.gdshader" id="2_tbgi4"]
 [ext_resource type="Shader" uid="uid://qc755l8ef71q" path="res://res/post.gdshader" id="3_sugp2"]
+[ext_resource type="AudioStream" uid="uid://biny7ens4o0ey" path="res://res/TidesOfTime.ogg" id="5_tipki"]
 [ext_resource type="Script" uid="uid://bbnoex06qr4fw" path="res://cs/DebugMenu.cs" id="6_o6xl0"]
 [ext_resource type="LabelSettings" uid="uid://d0dw7236n1ebx" path="res://res/label_settings.tres" id="6_tefeu"]
 
@@ -103,6 +104,11 @@ directional_shadow_blend_splits = true
 [node name="Player" parent="World" instance=ExtResource("2_0xm2m")]
 process_priority = -1
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 256, 2)
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="World"]
+stream = ExtResource("5_tipki")
+volume_db = -8.0
+autoplay = true
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true

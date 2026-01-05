@@ -2,6 +2,7 @@
 .import/
 .godot/
 export.cfg
+.build/
 
 # Imported translations (automatically generated from CSV files)
 *.translation
