@@ -72,6 +72,11 @@ public partial class World : Node3D
 
 		chunkCompiler.wait();
 
+		if (Chunk.AmountCompiled > 1000)
+		{
+			Chunk.AmountCompiled /= 2;
+		}
+
 		for (x = (int) (player.Position.X / Chunk.CHUNK_SIZE) - 1; x <= (int) (player.Position.X / Chunk.CHUNK_SIZE) + 1; x++) {
 			for (int y = -1; y <= 1; y++) {
 				for (int z = (int) (player.Position.Z / Chunk.CHUNK_SIZE) - 1; z <= (int) (player.Position.Z / Chunk.CHUNK_SIZE) + 1; z++) {

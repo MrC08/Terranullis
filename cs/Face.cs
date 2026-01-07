@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Godot;
 
 public struct Face
@@ -21,161 +21,150 @@ public struct Face
 		continuation = 1;
 	}
 
-	public bool Add(List<Vector3> vertices, List<Vector3> normals, List<float> tex, List<int> indices, int index)
+	[MethodImpl(MethodImplOptions.AggressiveOptimization)] // No, fr tho
+	public bool Add(MeshSpan<Vector3> vertices, MeshSpan<Vector3> normals, MeshSpan<float> tex, MeshSpan<int> indices, int index)
 	{
 		if (facing == Facing.WEST)
 		{
-			vertices.Add(new Vector3(position.X, position.Y, position.Z));
-			vertices.Add(new Vector3(position.X, position.Y, position.Z + continuation));
-			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z + continuation));
-			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z));
+			vertices.AddQuadruplet(
+				new Vector3(position.X, position.Y, position.Z),
+				new Vector3(position.X, position.Y, position.Z + continuation),
+				new Vector3(position.X, position.Y + 1, position.Z + continuation),
+				new Vector3(position.X, position.Y + 1, position.Z));
 		
-			indices.Add(index);
-			indices.Add(index + 3);
-			indices.Add(index + 1);
-			indices.Add(index + 1);
-			indices.Add(index + 3);
-			indices.Add(index + 2);
+			indices.AddHextuplet(index,
+				index + 3,
+				index + 1,
+				index + 1,
+				index + 3,
+				index + 2);
 
 			tex.Add(0.0001f); tex.Add((texture + 0.9999f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add((texture + 0.9999f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add((texture + 0.0001f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add((texture + 0.0001f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 
-			normals.Add(Vector3.Left);
-			normals.Add(Vector3.Left);
-			normals.Add(Vector3.Left);
-			normals.Add(Vector3.Left);
+			normals.AddQuadruplet(Vector3.Left);
 
 			continuation = 1;
 			return true;
 		} else if (facing == Facing.EAST)
 		{
-			vertices.Add(new Vector3(position.X + 1f, position.Y, position.Z));
-			vertices.Add(new Vector3(position.X + 1f, position.Y, position.Z + continuation));
-			vertices.Add(new Vector3(position.X + 1f, position.Y + 1, position.Z + continuation));
-			vertices.Add(new Vector3(position.X + 1f, position.Y + 1, position.Z));
+			vertices.AddQuadruplet(
+				new Vector3(position.X + 1f, position.Y, position.Z),
+				new Vector3(position.X + 1f, position.Y, position.Z + continuation),
+				new Vector3(position.X + 1f, position.Y + 1, position.Z + continuation),
+				new Vector3(position.X + 1f, position.Y + 1, position.Z));
 			
-			indices.Add(index);
-			indices.Add(index + 1);
-			indices.Add(index + 3);
-			indices.Add(index + 1);
-			indices.Add(index + 2);
-			indices.Add(index + 3);
+			indices.AddHextuplet(index,
+				index + 1,
+				index + 3,
+				index + 1,
+				index + 2,
+				index + 3);
 
 			tex.Add(0.9999f); tex.Add((texture + 0.9999f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add((texture + 0.9999f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add((texture + 0.0001f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add((texture + 0.0001f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			
-			normals.Add(Vector3.Right);
-			normals.Add(Vector3.Right);
-			normals.Add(Vector3.Right);
-			normals.Add(Vector3.Right);
+			normals.AddQuadruplet(Vector3.Right);
 
 			continuation = 1;
 			return true;
 		} else if (facing == Facing.DOWN)
 		{
-			vertices.Add(new Vector3(position.X, position.Y, position.Z));
-			vertices.Add(new Vector3(position.X + 1, position.Y, position.Z));
-			vertices.Add(new Vector3(position.X, position.Y, position.Z + continuation));
-			vertices.Add(new Vector3(position.X + 1, position.Y, position.Z + continuation));
+			vertices.AddQuadruplet(
+				new Vector3(position.X, position.Y, position.Z),
+				new Vector3(position.X + 1, position.Y, position.Z),
+				new Vector3(position.X, position.Y, position.Z + continuation),
+				new Vector3(position.X + 1, position.Y, position.Z + continuation));
 
 			tex.Add(0.9999f); tex.Add((texture + 0.0001f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add((texture + 0.9999f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add((texture + 0.0001f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add((texture + 0.9999f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 
-			normals.Add(Vector3.Down);
-			normals.Add(Vector3.Down);
-			normals.Add(Vector3.Down);
-			normals.Add(Vector3.Down);
+			normals.AddQuadruplet(Vector3.Down);
 
-			indices.Add(index);
-			indices.Add(index + 2);
-			indices.Add(index + 1);
-			indices.Add(index + 3);
-			indices.Add(index + 1);
-			indices.Add(index + 2);
+			indices.AddHextuplet(index,
+				index + 2,
+				index + 1,
+				index + 3,
+				index + 1,
+				index + 2);
 
 			continuation = 1;
 			return true;
 		} else if (facing == Facing.UP)
 		{
-			vertices.Add(new Vector3(position.X, position.Y + 1f, position.Z));
-			vertices.Add(new Vector3(position.X + 1, position.Y + 1f, position.Z));
-			vertices.Add(new Vector3(position.X, position.Y + 1f, position.Z + continuation));
-			vertices.Add(new Vector3(position.X + 1, position.Y + 1f, position.Z + continuation));
+			vertices.AddQuadruplet(
+				new Vector3(position.X, position.Y + 1f, position.Z),
+				new Vector3(position.X + 1, position.Y + 1f, position.Z),
+				new Vector3(position.X, position.Y + 1f, position.Z + continuation),
+				new Vector3(position.X + 1, position.Y + 1f, position.Z + continuation));
 
 			tex.Add(0.0001f); tex.Add((texture + 0.0001f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add((texture + 0.9999f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add((texture + 0.0001f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add((texture + 0.9999f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 
-			normals.Add(Vector3.Up);
-			normals.Add(Vector3.Up);
-			normals.Add(Vector3.Up);
-			normals.Add(Vector3.Up);
+			normals.AddQuadruplet(Vector3.Up);
 
-			indices.Add(index);
-			indices.Add(index + 1);
-			indices.Add(index + 2);
-			indices.Add(index + 3);
-			indices.Add(index + 2);
-			indices.Add(index + 1);
+			indices.AddHextuplet(index,
+				index + 1,
+				index + 2,
+				index + 3,
+				index + 2,
+				index + 1);
 
 			continuation = 1;
 			return true;
 		} else if (facing == Facing.NORTH)
 		{
-			vertices.Add(new Vector3(position.X, position.Y, position.Z));
-			vertices.Add(new Vector3(position.X + continuation, position.Y, position.Z));
-			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z));
-			vertices.Add(new Vector3(position.X + continuation, position.Y + 1, position.Z));
+			vertices.AddQuadruplet(
+				new Vector3(position.X, position.Y, position.Z),
+				new Vector3(position.X + continuation, position.Y, position.Z),
+				new Vector3(position.X, position.Y + 1, position.Z),
+				new Vector3(position.X + continuation, position.Y + 1, position.Z));
 
 			tex.Add(0.9999f); tex.Add((texture + 0.9999f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add((texture + 0.9999f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add((texture + 0.0001f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add((texture + 0.0001f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			
-			normals.Add(Vector3.Forward);
-			normals.Add(Vector3.Forward);
-			normals.Add(Vector3.Forward);
-			normals.Add(Vector3.Forward);
+			normals.AddQuadruplet(Vector3.Forward);
 			
-			indices.Add(index);
-			indices.Add(index + 1);
-			indices.Add(index + 2);
-			indices.Add(index + 3);
-			indices.Add(index + 2);
-			indices.Add(index + 1);
+			indices.AddHextuplet(index,
+				index + 1,
+				index + 2,
+				index + 3,
+				index + 2,
+				index + 1);
 
 			continuation = 1;
 			return true;
 		} else if (facing == Facing.SOUTH)
 		{
-			vertices.Add(new Vector3(position.X, position.Y, position.Z + 1f));
-			vertices.Add(new Vector3(position.X + continuation, position.Y, position.Z + 1f));
-			vertices.Add(new Vector3(position.X, position.Y + 1, position.Z + 1f));
-			vertices.Add(new Vector3(position.X + continuation, position.Y + 1, position.Z + 1f));
+			vertices.AddQuadruplet(
+				new Vector3(position.X, position.Y, position.Z + 1f),
+				new Vector3(position.X + continuation, position.Y, position.Z + 1f),
+				new Vector3(position.X, position.Y + 1, position.Z + 1f),
+				new Vector3(position.X + continuation, position.Y + 1, position.Z + 1f));
 
 			tex.Add(0.0001f); tex.Add((texture + 0.9999f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add((texture + 0.9999f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.0001f); tex.Add((texture + 0.0001f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			tex.Add(0.9999f); tex.Add((texture + 0.0001f) / Chunk.TEX_SIZE); tex.Add(1f / continuation); tex.Add(0);
 			
-			normals.Add(Vector3.Back);
-			normals.Add(Vector3.Back);
-			normals.Add(Vector3.Back);
-			normals.Add(Vector3.Back);
+			normals.AddQuadruplet(Vector3.Back);
 			
-			indices.Add(index + 2);
-			indices.Add(index + 3);
-			indices.Add(index + 1);
-			indices.Add(index + 1);
-			indices.Add(index);
-			indices.Add(index + 2);
+			indices.AddHextuplet(index + 2,
+				index + 3,
+				index + 1,
+				index + 1,
+				index,
+				index + 2);
 
 			continuation = 1;
 			return true;
