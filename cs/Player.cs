@@ -3,8 +3,8 @@ using Godot;
 
 public partial class Player : CharacterBody3D
 {
-	const float ACCELERATION = 60f;
-	const float SPEED = 5f;
+	const float ACCELERATION = 80f;
+	const float SPEED = 6f;
 	const float JUMP_VELOCITY = 7f;
 	const float TERMINAL_VELOCITY = 50f;
 

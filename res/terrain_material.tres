@@ -9,5 +9,5 @@ render_priority = 0
 shader = ExtResource("1_d8too")
 shader_parameter/texture_albedo = ExtResource("2_0y5cw")
 shader_parameter/smoothness_map = ExtResource("2_lxkg2")
-shader_parameter/sky_color = Color(0.64705884, 1, 1, 1)
+shader_parameter/sky_color = Color(0.38039216, 0.6901961, 0.6901961, 1)
 shader_parameter/lod = false

@@ -1,6 +1,7 @@
 shader_type canvas_item;
 
 uniform sampler2D tex : hint_screen_texture;
+uniform sampler2D tex_depth : hint_depth_texture;
 
 const mat4 dither_matrix = mat4(
 	vec4(0, 8, 2, 10),

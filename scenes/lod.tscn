@@ -10,7 +10,6 @@ render_priority = 0
 shader = ExtResource("2_s171g")
 shader_parameter/texture_albedo = ExtResource("3_r4efl")
 shader_parameter/smoothness_map = ExtResource("3_rh5k0")
-shader_parameter/sky_color = Color(0.64705884, 1, 1, 1)
 shader_parameter/lod = true
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_kdh3y"]

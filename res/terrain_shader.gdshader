@@ -5,12 +5,7 @@ render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_sc
 uniform sampler2D texture_albedo : source_color, filter_nearest, repeat_enable;
 uniform sampler2D smoothness_map : source_color, filter_nearest, repeat_enable;
 
-uniform vec3 sky_color : source_color;
-
 uniform bool lod;
-
-const float cam_near = 0.05; 
-const float cam_far = 4000.0;
 
 const mat4 dither_matrix = mat4(
 	vec4(0, 8, 2, 10),
@@ -22,11 +17,6 @@ const mat4 dither_matrix = mat4(
 varying float dist;
 varying vec2 uv;
 varying float vertex_id_interp;
-
-
-float random(vec2 seed) {
-	return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
 
 
 void vertex() {
@@ -61,10 +51,6 @@ void fragment() {
 	vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth_raw); 
 	vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0); 
 	view.xyz /= view.w; 
-	
-	float depth_linear = -view.z; 
-	
-	float depth_normalized = (depth_linear - cam_near) / (cam_far - cam_near);
 
 	// Fade between chunks and LODs
 	if (lod) {
@@ -95,8 +81,6 @@ void fragment() {
 	SPECULAR = smoothness;
 	METALLIC = smoothness;
 
-	// Fade with distance
-	ALBEDO.rgb = mix(ALBEDO.rgb, sky_color, pow(depth_normalized, 1.25));
 
 	if (lod) {
 		ALPHA = 1.0;
