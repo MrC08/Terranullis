@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 public partial class Chunk : Node3D, ICompilable
@@ -172,10 +173,10 @@ public partial class Chunk : Node3D, ICompilable
 		var arrays = new Godot.Collections.Array();
 		arrays.Resize((int) Mesh.ArrayType.Max);
 		
-		List<Vector3> vertices = new List<Vector3>();
-		List<Vector3> normals = new List<Vector3>();
-		List<float> tex = new List<float>();
-		List<int> indices = new List<int>();
+		MeshSpan<Vector3> vertices = new MeshSpan<Vector3>();
+		MeshSpan<Vector3> normals = new MeshSpan<Vector3>();
+		MeshSpan<float> tex = new MeshSpan<float>();
+		MeshSpan<int> indices = new MeshSpan<int>();
 		
 		int index = 0;
 
@@ -312,16 +313,16 @@ public partial class Chunk : Node3D, ICompilable
 			index += 4;
 		
 		if (index != 0) {
-			arrays[(int) Mesh.ArrayType.Vertex] = Variant.From(vertices.ToArray());
-			arrays[(int) Mesh.ArrayType.Normal] = Variant.From(normals.ToArray());
-			arrays[(int) Mesh.ArrayType.Weights] = Variant.From(tex.ToArray());
-			arrays[(int) Mesh.ArrayType.Index] = Variant.From(indices.ToArray());
+			arrays[(int) Mesh.ArrayType.Vertex] = Variant.CreateFrom(vertices.GetSpan());
+			arrays[(int) Mesh.ArrayType.Normal] = Variant.CreateFrom(normals.GetSpan());
+			arrays[(int) Mesh.ArrayType.Weights] = Variant.CreateFrom(tex.GetSpan());
+			arrays[(int) Mesh.ArrayType.Index] = Variant.CreateFrom(indices.GetSpan());
 			
 			((ArrayMesh) meshInstance.Mesh).AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
 			
 			List<Vector3> rawFaces = new List<Vector3>();
-			foreach (int i in indices) {
-				rawFaces.Add(vertices[i]);
+			foreach (int i in indices.GetSpan()) {
+				rawFaces.Add(vertices.GetSpan()[i]);
 			}
 			
 			((ConcavePolygonShape3D) collisionShape.Shape).SetFaces(rawFaces.ToArray());
