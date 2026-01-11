@@ -9,7 +9,12 @@ void vertex() {
 }
 
 vec2 pos_to_noise_uv(vec2 v) {
-	return (v / vec2(180000.0, 90000.0)).yx;
+	return ((v + vec2(180000.0, 90000.)) / vec2(360000.0, 180000.0)).yx;
+}
+
+float get_height(vec2 pos) {
+	vec2 uv = pos_to_noise_uv(pos);
+	return texture(global_noise, uv).r;
 }
 
 vec3 rotateX(vec3 v, float angle) {
@@ -59,15 +64,15 @@ void fragment() {
 	
 	dir = rotateZ(dir, tan(-CAMERA_DIRECTION_WORLD.y));
 	dir = mat3(
-		vec3(CAMERA_DIRECTION_WORLD.z, 0.0, -CAMERA_DIRECTION_WORLD.x),
+		vec3(-CAMERA_DIRECTION_WORLD.z, 0.0, CAMERA_DIRECTION_WORLD.x),
 		vec3(0.0, 1.0, 0.0),
-		vec3(CAMERA_DIRECTION_WORLD.x, 0.0, CAMERA_DIRECTION_WORLD.z)
+		vec3(-CAMERA_DIRECTION_WORLD.x, 0.0, -CAMERA_DIRECTION_WORLD.z)
 	) * dir;
 	//rotateY(dir, (CAMERA_DIRECTION_WORLD.z));
 
 	//vec3 dir = CAMERA_DIRECTION_WORLD * vec3(1.0, -1.0, 1.0);
 	for (float step = 0.0; step < 256.0; step++) {
-		if (pos.y < texture(global_noise, pos_to_noise_uv(pos.xz)).r) {
+		if (pos.y < get_height(pos.xz)) {
 			ALPHA = 1.0;
 			break;
 		}

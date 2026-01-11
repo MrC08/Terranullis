@@ -38,7 +38,6 @@ public partial class World : Node3D
 		chunkMap = new();
 		LODMap = new();
 
-		Generator.noiseArray = noiseArray;
 		Generator.Init();
 
 		MeshInstance3D raymarchQuad = (MeshInstance3D) player.GetNode("Camera3D/MeshInstance3D");
