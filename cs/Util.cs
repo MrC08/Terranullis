@@ -36,4 +36,14 @@ public partial class Util : Node
 	{
 		return new Vector3(v.X * LOD.LOD_SIZE, 0, v.Z * LOD.LOD_SIZE).Floor();
 	}
+
+	public static Vector2 WorldPosToCoords(float x, float y)
+	{
+		return new Vector2(y / 180_000f, x / 90_000f);
+	}
+
+	public static Vector2 CoordsToWorldPos(float lat, float lon)
+	{
+		return new Vector2(lon * 180_000f, lat * 90_000f);
+	}
 }

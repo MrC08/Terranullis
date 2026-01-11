@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cs5hhep0lin7l"]
+[gd_scene load_steps=25 format=3 uid="uid://cs5hhep0lin7l"]
 
 [ext_resource type="Script" uid="uid://cajiepfijw2j0" path="res://cs/World.cs" id="1_sugp2"]
 [ext_resource type="PackedScene" uid="uid://dwuwtf8io6h4p" path="res://scenes/player.tscn" id="2_0xm2m"]
@@ -53,6 +53,8 @@ ssao_radius = 1.34
 ssao_intensity = 3.95
 ssao_horizon = 0.3
 glow_enabled = true
+adjustment_enabled = true
+adjustment_saturation = 0.9
 
 [sub_resource type="Gradient" id="Gradient_jyhfs"]
 colors = PackedColorArray(0.38431373, 0.45490196, 0.54901963, 1, 0.27, 0.34800002, 0.45, 1)
@@ -67,8 +69,11 @@ colors = PackedColorArray(0.42352942, 0.47843137, 0.5882353, 1, 0.56, 0.6066667,
 offsets = PackedFloat32Array(0, 0.056962024)
 colors = PackedColorArray(1, 1, 1, 1, 0.07806667, 0.053, 0.1, 1)
 
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_tipki"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tbgi4"]
 shader = ExtResource("3_sugp2")
+shader_parameter/global_noise = SubResource("PlaceholderTexture2D_tipki")
 
 [node name="Node3D" type="Node3D"]
 
@@ -103,7 +108,7 @@ directional_shadow_blend_splits = true
 
 [node name="Player" parent="World" instance=ExtResource("2_0xm2m")]
 process_priority = -1
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 256, 2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 256, 0)
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="World"]
 stream = ExtResource("5_tipki")

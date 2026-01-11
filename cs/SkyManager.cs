@@ -37,8 +37,7 @@ public partial class SkyManager : WorldEnvironment
 			sun.Transform = sun.Transform.Orthonormalized();
 
 			sun.GlobalPosition = playerPos;
-		} else
-		{
+		} else {
 			sun = (DirectionalLight3D) GetNode("Sun");
 		}
 

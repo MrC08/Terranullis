@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://dwuwtf8io6h4p"]
+[gd_scene load_steps=9 format=3 uid="uid://dwuwtf8io6h4p"]
 
 [ext_resource type="Script" uid="uid://yf7iyl8hnv6g" path="res://cs/Player.cs" id="1_3vyb7"]
+[ext_resource type="Shader" uid="uid://dbss6102fnn4s" path="res://res/raymarch.gdshader" id="2_g2els"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sh265"]
 radius = 0.4
@@ -17,6 +18,14 @@ albedo_color = Color(1, 1, 1, 0.039215688)
 [sub_resource type="BoxMesh" id="BoxMesh_3vyb7"]
 material = SubResource("StandardMaterial3D_3vyb7")
 size = Vector3(1.01, 1.01, 1.01)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qhqgy"]
+render_priority = 0
+shader = ExtResource("2_g2els")
+
+[sub_resource type="QuadMesh" id="QuadMesh_dqkch"]
+flip_faces = true
+size = Vector2(2, 2)
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_3vyb7")
@@ -45,3 +54,11 @@ mesh = SubResource("BoxMesh_3vyb7")
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 fov = 80.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Camera3D"]
+visible = false
+material_override = SubResource("ShaderMaterial_qhqgy")
+cast_shadow = 0
+extra_cull_margin = 16384.0
+ignore_occlusion_culling = true
+mesh = SubResource("QuadMesh_dqkch")

@@ -22,7 +22,18 @@ varying float vertex_id_interp;
 void vertex() {
 	//VERTEX.y += random(vec2(float(VERTEX_ID) + VERTEX.x, VERTEX.z)) * 0.0001f;
 
-	VERTEX = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	//VERTEX = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	VERTEX = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+
+	VERTEX -= floor(CAMERA_POSITION_WORLD);
+	VERTEX = round(VERTEX);
+	VERTEX -= fract(CAMERA_POSITION_WORLD);
+
+	mat4 view_matrix = VIEW_MATRIX;
+	view_matrix[3].xyz = vec3(0.0);
+
+	VERTEX = (view_matrix * vec4(VERTEX, 1.0)).xyz;
+
 	NORMAL = normalize((MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	BINORMAL = normalize((MODELVIEW_MATRIX * vec4(BINORMAL, 0.0)).xyz);
 	TANGENT = normalize((MODELVIEW_MATRIX * vec4(TANGENT, 0.0)).xyz);
@@ -50,7 +61,9 @@ void fragment() {
 
 	vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth_raw); 
 	vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0); 
-	view.xyz /= view.w; 
+	view.xyz /= view.w;
+	float depth_linear = -view.z; 
+	float depth_normalized = (depth_linear - 0.05) / (4000.0 - 0.05);
 
 	// Fade between chunks and LODs
 	if (lod) {
@@ -63,11 +76,10 @@ void fragment() {
 		}
 	}
 
-	if (!lod && dist < 32.0) {
-		DEPTH = FRAGCOORD.z;
-	} else {
-		DEPTH = FRAGCOORD.z;
-	}
+	DEPTH = FRAGCOORD.z;
+
+	FOG = vec4(0.3, 0.5, 0.7, min(0.9, pow(depth_normalized * 2.0, 1.5)));
+
 
 	// Default material shader
 	vec4 albedo_tex = texture(texture_albedo, uv);

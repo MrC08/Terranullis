@@ -1,11 +1,10 @@
 shader_type sky;
 
-uniform vec3 sky_zenith_color : source_color;
-uniform vec3 sky_horizon_color : source_color;
-uniform vec3 sky_nadir_color : source_color;
+uniform vec3 sky_zenith_color : source_color; 	// 61738c
+uniform vec3 sky_horizon_color : source_color; 	// a8a6a9
+uniform vec3 sky_nadir_color : source_color; 	// 707994
 
 uniform sampler2D star_noise;
-
 
 void sky() {
 	vec3 sky_col = mix(sky_zenith_color, sky_horizon_color, clamp(pow(SKY_COORDS.y * 2.0, 5.0), 0.0, 1.0));
