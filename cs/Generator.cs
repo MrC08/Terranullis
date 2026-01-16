@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Godot;
 
@@ -266,16 +267,64 @@ public static class Generator
 		for (int x = 0; x < AirCurrentMap.Length; x++)
 		{
 			AirCurrentMap[x] = new Vector2[LINES_OF_LAT];
-			for (int y = 0; y < AirCurrentMap[x].Length; y++)
+			/*for (int y = 0; y < AirCurrentMap[x].Length; y++)
 			{
-				if (y == 0 || y == LINES_OF_LAT - 1 || ElevationMap[(x + 1) % LINES_OF_LON][y] <= 0)
+				if (y == 0 || y == LINES_OF_LAT - 1 || ElevationMap[(x + 1) % LINES_OF_LON][y] < ElevationMap[x][y] || ElevationMap[(x + 3) % LINES_OF_LON][y] < -0.1)
 					AirCurrentMap[x][y] = Vector2.Right;
 				else
 				{
-					float difference = ElevationMap[(x + 1) % LINES_OF_LON][y + 1] - ElevationMap[(x + 1) % LINES_OF_LON][y - 1];
-					difference = Mathf.Clamp(difference, -0.99f, 0.99f);
-					AirCurrentMap[x][y] = new Vector2(Mathf.Cos(difference), Mathf.Sin(difference) * 1.5f);
+					float difference = 
+						(ElevationMap[(x + 1) % LINES_OF_LON][y + 1] + ElevationMap[(x + 2) % LINES_OF_LON][y + 1]) -
+						(ElevationMap[(x + 1) % LINES_OF_LON][y - 1] + ElevationMap[(x + 2) % LINES_OF_LON][y - 1]);
+					difference = Mathf.Clamp(2f * difference, -0.99f, 0.99f);
+					AirCurrentMap[x][y] = new Vector2(Mathf.Cos(difference), -Mathf.Sin(difference));
 				}
+			}*/
+		}
+		for (int x = LINES_OF_LON - 1; x > 0; x--)
+		{
+			for (int y = 0; y < LINES_OF_LAT; y++)
+			{
+				if (x != 359 && !AirCurrentMap[x][y].Equals(Vector2.Zero))
+					continue;
+
+				AirCurrentMap[x][y] = Vector2.Right;
+				List<Vector2I> frontier = new List<Vector2I>();
+				List<Vector2I> visited = new List<Vector2I>();
+				frontier.Add(new Vector2I(x, y));
+
+				while (frontier.Count > 0)
+				{
+					Vector2I pos = frontier[0];
+					frontier.RemoveAt(0);
+					visited.Add(pos);
+
+					for (int x2 = Math.Max(0, pos.X - 1); x2 <= pos.X; x2++)
+					{
+						for (int y2 = Math.Max(0, pos.Y - 1); y2 <= MathF.Min(179, pos.Y + 1); y2++)
+						{
+							if (x2 == pos.X && y2 == pos.Y)
+								continue;
+
+							Vector2I newPos = new Vector2I(x2, y2);
+							if (!AirCurrentMap[newPos.X][newPos.Y].Equals(Vector2.Right) && (ElevationMap[pos.X][pos.Y] <= 0 || ElevationMap[newPos.X][newPos.Y] <= 0.02 + ElevationMap[pos.X][pos.Y]))
+							{
+								AirCurrentMap[newPos.X][newPos.Y] = new Vector2(pos.X - newPos.X, pos.Y - newPos.Y);
+								
+								if (newPos.X > 0 && !frontier.Contains(newPos) && !visited.Contains(newPos))
+									frontier.Add(newPos);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		for (int x = 0; x < LINES_OF_LON; x++)
+		{
+			for (int y = 0; y < LINES_OF_LAT; y++)
+			{
+				AirCurrentMap[x][y] = (AirCurrentMap[x][y] + new Vector2(1, 0)).Normalized();
 			}
 		}
 

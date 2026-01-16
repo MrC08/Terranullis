@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Godot;
 
 public partial class DebugGenerateWorld : Sprite2D
@@ -40,5 +41,16 @@ public partial class DebugGenerateWorld : Sprite2D
 				+ new Color(0.01f, 0.01f, 0.01f));
 		}
 		((ImageTexture) ((Sprite2D) GetNode("AirOverlay")).Texture).Update(img);
+
+		Line2D cursor = (Line2D) GetNode("Cursor");
+		cursor.GlobalPosition = GetGlobalMousePosition();
+		Vector2I pos = new Vector2I((int) cursor.GlobalPosition.X / 2 + 180, (int) cursor.GlobalPosition.Y / 2 + 90);
+
+		if (pos.X > 0 && pos.Y > 0 && pos.X < 360 && pos.Y < 180)
+		{
+			cursor.Visible = true;
+			cursor.SetPointPosition(1, Generator.AirCurrentMap[pos.X][pos.Y] * 20);
+		} else
+			cursor.Visible = false;
 	}
 }
