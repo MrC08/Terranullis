@@ -60,19 +60,25 @@ public partial class LOD : Node3D, ICompilable
 
 		for (int x = 0; x < LOD_SIZE; x++) {
 			for (int z = 0; z < LOD_SIZE; z++) {
-				vertices.Add(new Vector3(x, noiseMap[x + z * LOD_SIZE1], z));
-				vertices.Add(new Vector3(x + 1, noiseMap[(x + 1) + z * LOD_SIZE1], z));
-				vertices.Add(new Vector3(x, noiseMap[x + (z + 1) * LOD_SIZE1], z + 1));
-				vertices.Add(new Vector3(x + 1, noiseMap[(x + 1) + (z + 1) * LOD_SIZE1], z + 1));
+				float nn = Mathf.Max(-1, noiseMap[x + z * LOD_SIZE1]);
+				float pn = Mathf.Max(-1, noiseMap[(x + 1) + z * LOD_SIZE1]);
+				float np = Mathf.Max(-1, noiseMap[x + (z + 1) * LOD_SIZE1]);
+				float pp = Mathf.Max(-1, noiseMap[(x + 1) + (z + 1) * LOD_SIZE1]);
 
-				float texture = 2;//noiseMap[x + z * LOD_SIZE1] > 0 ? 2 : 4;
+				vertices.Add(new Vector3(x, nn, z));
+				vertices.Add(new Vector3(x + 1, pn, z));
+				vertices.Add(new Vector3(x, np, z + 1));
+				vertices.Add(new Vector3(x + 1, pp, z + 1));
+
+				//float texture = 2;
+				float texture = noiseMap[x + z * LOD_SIZE1] >= -1 ? 2 : 4;
 				tex.Add(new Vector2(0, texture / TEX_SIZE));
 				tex.Add(new Vector2(1, texture / TEX_SIZE));
 				tex.Add(new Vector2(0, (texture + 1) / TEX_SIZE));
 				tex.Add(new Vector2(1, (texture + 1) / TEX_SIZE));
 
-				Vector3 a = new Vector3(x + 1, noiseMap[(x + 1) + z * LOD_SIZE1], z) - new Vector3(x, noiseMap[x + z * LOD_SIZE1], z);
-				Vector3 b = new Vector3(x, noiseMap[x + (z + 1) * LOD_SIZE1], z + 1) - new Vector3(x, noiseMap[x + z * LOD_SIZE1], z);
+				Vector3 a = new Vector3(x + 1, pn, z) - new Vector3(x, nn, z);
+				Vector3 b = new Vector3(x, np, z + 1) - new Vector3(x, nn, z);
 				Vector3 normal = -new Vector3(
 					(a.Y * b.Z) - (a.Z * b.Y),
 					(a.Z * b.X) - (a.X * b.Z),

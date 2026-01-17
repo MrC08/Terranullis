@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://cs5hhep0lin7l"]
+[gd_scene load_steps=29 format=3 uid="uid://cs5hhep0lin7l"]
 
 [ext_resource type="Script" uid="uid://cajiepfijw2j0" path="res://cs/World.cs" id="1_sugp2"]
 [ext_resource type="PackedScene" uid="uid://dwuwtf8io6h4p" path="res://scenes/player.tscn" id="2_0xm2m"]
@@ -8,6 +8,7 @@
 [ext_resource type="AudioStream" uid="uid://biny7ens4o0ey" path="res://res/TidesOfTime.ogg" id="5_tipki"]
 [ext_resource type="Script" uid="uid://bbnoex06qr4fw" path="res://cs/DebugMenu.cs" id="6_o6xl0"]
 [ext_resource type="LabelSettings" uid="uid://d0dw7236n1ebx" path="res://res/label_settings.tres" id="6_tefeu"]
+[ext_resource type="Script" uid="uid://b01odvt1o44r3" path="res://cs/WorldMap.cs" id="9_85g3d"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_0wfyh"]
 frequency = 0.0125
@@ -74,6 +75,23 @@ colors = PackedColorArray(1, 1, 1, 1, 0.07806667, 0.053, 0.1, 1)
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tbgi4"]
 shader = ExtResource("3_sugp2")
 shader_parameter/global_noise = SubResource("PlaceholderTexture2D_tipki")
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_85g3d"]
+size = Vector2(360, 180)
+
+[sub_resource type="Gradient" id="Gradient_85g3d"]
+interpolation_mode = 2
+interpolation_color_space = 2
+offsets = PackedFloat32Array(0.97333336, 1)
+colors = PackedColorArray(1, 0, 0, 1, 1, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_choun"]
+gradient = SubResource("Gradient_85g3d")
+width = 24
+height = 24
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
 
 [node name="Node3D" type="Node3D"]
 
@@ -243,5 +261,36 @@ scale = Vector2(2, 2)
 pivot_offset = Vector2(0, 22)
 text = "Cmp. time:"
 label_settings = ExtResource("6_tefeu")
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer"]
+texture_filter = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -180.0
+offset_right = 360.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("PlaceholderTexture2D_85g3d")
+script = ExtResource("9_85g3d")
+
+[node name="Marker" type="TextureRect" parent="CanvasLayer/TextureRect"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.007
+anchor_top = 0.014
+anchor_right = 0.007
+anchor_bottom = 0.014
+offset_left = -5.04
+offset_top = -5.04
+offset_right = 24.96
+offset_bottom = 24.96
+scale = Vector2(0.25, 0.25)
+pivot_offset = Vector2(-5, -5)
+texture = SubResource("GradientTexture2D_choun")
 
 [connection signal="timeout" from="CanvasLayer/DebugMenu/ResetAverageFPS" to="CanvasLayer/DebugMenu" method="ResetAverageFPS"]

@@ -1,7 +1,6 @@
-using System.Linq.Expressions;
 using Godot;
 
-public partial class DebugGenerateWorld : Sprite2D
+public partial class GenerateWorld : Sprite2D
 {
 	Image img;
 
@@ -20,10 +19,13 @@ public partial class DebugGenerateWorld : Sprite2D
 	public override void _Process(double delta)
 	{
 		if (!Generator.WorldGenerated) {
+			((Label) GetNode("../../Step")).Text = Generator.GetNextGenerationStep();
 			Generator.StepGenerateWorld();
 			Texture = Generator.LatestProgress;
 			return;
 		}
+
+		GetTree().ChangeSceneToFile("res://scenes/main.tscn");
 
 		/*Sprite2D test = (Sprite2D) GetNode("test");
 
@@ -51,7 +53,7 @@ public partial class DebugGenerateWorld : Sprite2D
 			cursor.Visible = true;
 			cursor.SetPointPosition(1, Generator.AirCurrentMap[pos.X][pos.Y] * 150);
 		} else
-			cursor.Visible = false;*/
+			cursor.Visible = false;
 		
 		Label biomeText = (Label) GetNode("Biome");
 		biomeText.GlobalPosition = GetGlobalMousePosition() + new Vector2(24, 8);
@@ -61,6 +63,17 @@ public partial class DebugGenerateWorld : Sprite2D
 			biomeText.Visible = true;
 			biomeText.Text = Generator.BiomeMap[pos.X][pos.Y].ToString();
 		} else
-			biomeText.Visible = false;
+			biomeText.Visible = false;*/
+	}
+
+	public override void _Input(InputEvent @event)
+	{
+		if (@event is InputEventKey keyEvent)
+		{
+			if (keyEvent.Keycode == Key.R)
+			{
+				Generator.Init(GD.Randi());
+			}
+		}
 	}
 }

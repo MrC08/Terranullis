@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Terranullis"
-run/main_scene="uid://cs5hhep0lin7l"
+run/main_scene="uid://bp37kpb36rksr"
 config/features=PackedStringArray("4.5", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 

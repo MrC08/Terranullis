@@ -62,6 +62,26 @@ public static class Generator
 
 		Image img = Image.CreateFromData(LINES_OF_LON * 4, LINES_OF_LAT * 4, false, Image.Format.Rf, MemoryMarshal.AsBytes<float>(globalNoise));
 		globalNoiseTex = ImageTexture.CreateFromImage(img);
+
+		WorldGenerated = false;
+		TectonicsGenerated = false;
+		ElevationGenerated = false;
+		ClimateGenerated = false;
+		BiomesGenerated = false;
+	}
+
+
+	public static string GetNextGenerationStep()
+	{
+		if (!TectonicsGenerated)
+			return "Generating plate tectonics...";
+		else if (!ElevationGenerated)
+			return "Generating elevation...";
+		else if (!ClimateGenerated)
+			return "Generating climate...";
+		else if (!BiomesGenerated)
+			return "Generating biomes...";
+		return "Done!";
 	}
 
 
@@ -239,10 +259,13 @@ public static class Generator
 					ElevationMap[x][y] = Mathf.Min(1f, ElevationMap[x][y]);
 				} else
 				{ // Oceanic
-					ElevationMap[x][y] = -0.1f;
-					ElevationMap[x][y] -= noise.GetNoise2D(x * 10, y * 10) * 0.5f + 0.4f;
+					ElevationMap[x][y] = -0.2f;
+					ElevationMap[x][y] -= noise.GetNoise2D(x * 10, y * 10) * 0.4f + 0.3f;
 
-					ElevationMap[x][y] *= TectonicActivityMap[x][y];
+					ElevationMap[x][y] *= 0.1f + TectonicActivityMap[x][y];
+
+					ElevationMap[x][y] -= 0.4f;
+					ElevationMap[x][y] -= TectonicActivityMap[x][y] * 0.5f;
 
 					ElevationMap[x][y] = Mathf.Max(-1f, ElevationMap[x][y]);
 				}
@@ -434,7 +457,9 @@ public static class Generator
 			for (int y = 0; y < LINES_OF_LAT; y++)
 			{
 				TemperatureMap[x][y] = (LINES_OF_LAT_HALF - Math.Abs(y - LINES_OF_LAT_HALF)) / 105f;
-				TemperatureMap[x][y] -= Math.Max(0, Mathf.Pow(ElevationMap[x][y] * 0.6f, 2f));
+				TemperatureMap[x][y] -= Mathf.Pow(Math.Max(-0.1f, ElevationMap[x][y]) * 0.8f, 2f);
+
+				TemperatureMap[x][y] = Mathf.Lerp(TemperatureMap[x][y], 0.5f, HumidityMap[x][y] * 0.1f);
 
 				TemperatureMap[x][y] += noise.GetNoise2D(x * 8, y * 8) * 0.1f;
 
@@ -497,9 +522,9 @@ public static class Generator
 			{
 				Color c = BiomeHelper.GetBiomeColor(BiomeMap[x][y]);
 
-				debugImage[(x + y * LINES_OF_LON) * 3 + 0] = (byte) Math.Max(0, c.R8 - ElevationMap[x][y] * 32.0);
-				debugImage[(x + y * LINES_OF_LON) * 3 + 1] = (byte) Math.Max(0, c.G8 - ElevationMap[x][y] * 32.0);
-				debugImage[(x + y * LINES_OF_LON) * 3 + 2] = (byte) Math.Max(0, c.B8 - ElevationMap[x][y] * 32.0);
+				debugImage[(x + y * LINES_OF_LON) * 3 + 0] = (byte) Math.Clamp(c.R8 + ElevationMap[x][y] * 64.0, 0, 255);
+				debugImage[(x + y * LINES_OF_LON) * 3 + 1] = (byte) Math.Clamp(c.G8 + ElevationMap[x][y] * 64.0, 0, 255);
+				debugImage[(x + y * LINES_OF_LON) * 3 + 2] = (byte) Math.Clamp(c.B8 + ElevationMap[x][y] * 64.0, 0, 255);
 			}
 		}
 
@@ -515,23 +540,37 @@ public static class Generator
 	}
 
 
-	public static int[] GenerateHeightmap(Vector3 worldPos, int xSize, int ySize, bool includeWater)
-	{
-		return GenerateHeightmap(new Vector2(worldPos.X, worldPos.Z), xSize, ySize, includeWater);
-	}
-
-
 	public static int HeightAtPos(Vector2 pos, bool includeWater)
 	{
 		return HeightAtPos(pos.X, pos.Y, includeWater);
 	}
 	public static int HeightAtPos(float x, float y, bool includeWater)
 	{
-		int height = (int) (64 * noise.GetNoise2D(x, y));
-		height += 64;
+		float worldMapX = 180 + x / 500f;
+		float worldMapZ = 90 + y / 500f;
 
-		if (includeWater && height < 0)
-			height = 0;
+		float distortion = noise.GetNoise2D(x * 10, y * 10) * 0.01f;
+		float xDecimal = Mathf.Clamp(worldMapX - MathF.Truncate(worldMapX) + distortion, 0, 1);
+		float zDecimal = Mathf.Clamp(worldMapZ - MathF.Truncate(worldMapZ) + distortion, 0, 1);
+
+		float worldHeight = Mathf.Lerp(
+			Mathf.Lerp(ElevationMap[(int) Mathf.Floor(worldMapX)][(int) Mathf.Floor(worldMapZ)], ElevationMap[(int) Mathf.Floor(worldMapX)][(int) Mathf.Ceil(worldMapZ)], zDecimal),
+			Mathf.Lerp(ElevationMap[(int) Mathf.Ceil(worldMapX)][(int) Mathf.Floor(worldMapZ)], ElevationMap[(int) Mathf.Ceil(worldMapX)][(int) Mathf.Ceil(worldMapZ)], zDecimal),
+			xDecimal
+		);
+
+		int height;
+		if (worldHeight > 0) {
+			height = (int) (127 * worldHeight * noise.GetNoise2D(x, y));
+			height += (int) (127 * worldHeight);
+		} else
+		{
+			height = (int) (63 * worldHeight * noise.GetNoise2D(x, y));
+			height += (int) (63 * worldHeight);
+		}
+
+		if (includeWater && height < -1)
+			height = -2;
 		else if (height < -127)
 			height = -127;
 		
@@ -552,5 +591,9 @@ public static class Generator
 		}
 
 		return heightmap;
+	}
+	public static int[] GenerateHeightmap(Vector3 worldPos, int xSize, int ySize, bool includeWater)
+	{
+		return GenerateHeightmap(new Vector2(worldPos.X, worldPos.Z), xSize, ySize, includeWater);
 	}
 }

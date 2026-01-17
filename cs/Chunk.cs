@@ -139,13 +139,13 @@ public partial class Chunk : Node3D, ICompilable
 					}
 				}
 
-				/*if (GlobalPosition.Y <= -1)
+				if (GlobalPosition.Y <= -1)
 				{
 					for (int y = CHUNK_VSIZE - 1; y > topGenerate; y--)
 					{
 						SetBlock(x, y, z, 4);
 					}
-				}*/
+				}
 			}		
 		}
 

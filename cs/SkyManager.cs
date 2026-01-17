@@ -33,7 +33,7 @@ public partial class SkyManager : WorldEnvironment
 		if (!Engine.IsEditorHint()) {
 			playerPos = player.GlobalPosition;
 
-			sun.RotateZ((float) delta * 0.004363323f * 2f);
+			sun.RotateZ((float) delta * 0.004363323f);
 			sun.Transform = sun.Transform.Orthonormalized();
 
 			sun.GlobalPosition = playerPos;

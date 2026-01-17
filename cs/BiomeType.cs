@@ -2,7 +2,7 @@ using Godot;
 
 public enum BiomeType
 {
-	ICE_CAP, TUNDRA, BOREAL_FOREST, BOGLANDS, MAGELLANIC_RAINFOREST,
+	ICE_SHEET, TUNDRA, BOREAL_FOREST, BOGLANDS, MAGELLANIC_RAINFOREST,
 	SHRUBLANDS, PRARIE, FOREST, TEMPERATE_RAINFOREST,
 	DESERT, EXTREME_DESERT, TROPICAL_RAINFOREST, JUNGLE, PAMPAS,
 	SHALLOW_OCEAN, DEEP_OCEAN, SEA_ICE, CORAL_REEF
@@ -10,8 +10,8 @@ public enum BiomeType
 
 //				Xeric			Dry				Moderate		Wet				Drenched
 
-//Ex. cold		Ice cap			Ice cap			Ice cap			Ice cap			Ice cap
-//Very cold		Ice cap			Tundra			Tundra			Boglands		Boglands		
+//Ex. cold		Tundra			Tundra			Ice sheet		Ice sheet		Ice sheet
+//Very cold		Tundra			Tundra			Boreal forest	Boreal forest	Boglands		
 //Cold			Tundra			Boreal forest	Boreal forest	Boglands		Magellanic Rainforest
 
 //Temerpate		Desert			Prarie			Forest			Forest			Temperate Rainforest	
@@ -37,7 +37,7 @@ public static class BiomeHelper
 	public static Color GetBiomeColor(BiomeType biome)
 	{
 		return (new Color[] {
-			new Color(0.95f, 0.95f, 1.0f),		// Ice cap
+			new Color(0.95f, 0.95f, 1.0f),		// Ice sheet
 			new Color(0.39f, 0.262f, 0.207f),	// Tundra
 			new Color(0.211f, 0.34f, 0.303f),	// Boreal forest
 			new Color(0.22f, 0.243f, 0.239f),	// Boglands
@@ -70,32 +70,36 @@ public static class BiomeHelper
 				return BiomeType.SEA_ICE;
 			} else if (temperature < HOT)
 			{
-				if (elevation > -0.05)
+				if (elevation > -0.5)
 					return BiomeType.SHALLOW_OCEAN;
 				else
 					return BiomeType.DEEP_OCEAN;
 			} else
 			{
-				if (elevation > -0.05)
-					return BiomeType.SHALLOW_OCEAN;
-				if (elevation > -0.2)
+				if (elevation > -0.5)
 					return BiomeType.CORAL_REEF;
 				else
 					return BiomeType.DEEP_OCEAN;
 			}
 		}
-
-		if (temperature < EX_COLD)
+		
+		if (temperature < EX_COLD / 2f)
 		{
-			return BiomeType.ICE_CAP;
+			return BiomeType.ICE_SHEET;
+		} else if (temperature < EX_COLD)
+		{
+			if (humidity < DRY)
+				return BiomeType.ICE_SHEET;
+			else
+				return BiomeType.TUNDRA;
 		} else if (temperature < VERY_COLD)
 		{
-			if (humidity < XERIC)
-			{
-				return BiomeType.ICE_CAP;
-			} else if (humidity < MODERATE)
+			if (humidity < DRY)
 			{
 				return BiomeType.TUNDRA;
+			} else if (humidity < WET)
+			{
+				return BiomeType.BOREAL_FOREST;
 			} else
 			{
 				return BiomeType.BOGLANDS;
