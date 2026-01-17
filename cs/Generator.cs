@@ -13,6 +13,8 @@ public static class Generator
 	const int LINES_OF_LON_HALF = LINES_OF_LON / 2;
 	const int LINES_OF_LAT_HALF = LINES_OF_LAT / 2;
 
+	public static ulong seed;
+
 	public static FastNoiseLite noise;
 	public static ImageTexture globalNoiseTex;
 
@@ -25,15 +27,25 @@ public static class Generator
 
 	public static bool ElevationGenerated = false;
 	public static float[][] ElevationMap;
+	public static float[][] SmoothElevationMap;
+	public static Vector2[][] SlopeMap;
 
 	public static bool ClimateGenerated = false;
 	public static Vector2[][] AirCurrentMap;
+	public static float[][] HumidityMap;
+	public static float[][] TemperatureMap;
 
-	public static void Init()
+	public static bool BiomesGenerated = false;
+	public static BiomeType[][] BiomeMap;
+
+	public static void Init(ulong _seed = 2)
 	{
+		seed = _seed;
+
 		noise = new FastNoiseLite();
 		noise.NoiseType = FastNoiseLite.NoiseTypeEnum.SimplexSmooth;
 		noise.Frequency = 0.003f;
+		noise.Seed = (int) (seed % int.MaxValue);
 
 		// Parrallels lat * 4 * parrellels lon * 4 for 500x500 block resolution, about ~16 chunk resolution
 		float[] globalNoise = new float[LINES_OF_LAT * 4 * LINES_OF_LON * 4];
@@ -62,6 +74,8 @@ public static class Generator
 			GenerateElevation();
 		else if (!ClimateGenerated)
 			GenerateClimate();
+		else if (!BiomesGenerated)
+			GenerateBiomes();
 		else
 			WorldGenerated = true;
 
@@ -72,8 +86,7 @@ public static class Generator
 	public static void GenerateTectonicMap()
 	{
 		GD.Print("Generating tectonics");
-
-		GD.Seed(0);
+		GD.Seed(seed);
 
 		Vector2[][] tectonicMap = new Vector2[LINES_OF_LON][];
 		Vector2[][] tectonicCollisionMap = new Vector2[72][];
@@ -200,6 +213,7 @@ public static class Generator
 	public static void GenerateElevation()
 	{
 		GD.Print("Generating elevation");
+		GD.Seed(seed + 1);
 
 		byte[] debugImage = new byte[LINES_OF_LON * LINES_OF_LAT * 3];
 
@@ -249,6 +263,54 @@ public static class Generator
 			}
 		}
 
+				float[][] smoothElevationMapH = new float[360][];
+		for (int x = 0; x < LINES_OF_LON; x++)
+		{
+			smoothElevationMapH[x] = new float[180];
+			for (int y = 0; y < LINES_OF_LAT; y++)
+			{
+				float samples = 0;
+				for (int x2 = Mathf.Max(0, x - 1); x2 <= Mathf.Min(LINES_OF_LON - 1, x + 1); x2++)
+				{
+					smoothElevationMapH[x][y] += ElevationMap[x2][y];
+					samples++;
+				}
+				smoothElevationMapH[x][y] /= samples;
+			}
+		}
+
+		SmoothElevationMap = new float[360][];
+		for (int x = 0; x < LINES_OF_LON; x++)
+		{
+			SmoothElevationMap[x] = new float[180];
+			for (int y = 0; y < LINES_OF_LAT; y++)
+			{
+				float samples = 0;
+				for (int y2 = Mathf.Max(0, y - 1); y2 <= Mathf.Min(LINES_OF_LAT - 1, y + 1); y2++)
+				{
+					SmoothElevationMap[x][y] += smoothElevationMapH[x][y2];
+					samples++;
+				}
+				SmoothElevationMap[x][y] /= samples;
+			}
+		}
+
+
+		SlopeMap = new Vector2[LINES_OF_LON][];
+		for (int x = 0; x < SlopeMap.Length; x++)
+		{
+			SlopeMap[x] = new Vector2[LINES_OF_LAT];
+			for (int y = 0; y < SlopeMap[x].Length; y++)
+			{
+				float height = SmoothElevationMap[x][y];
+
+				float dx = SmoothElevationMap[x < LINES_OF_LON - 1 ? x + 1 : 0][y] - height;
+				float dy = SmoothElevationMap[x][y < LINES_OF_LAT - 1 ? y + 1 : y - 1] - height;
+
+				SlopeMap[x][y] = new Vector2(dx, dy);
+			}
+		}
+
 		LatestProgress = new ImageTexture();
 		((ImageTexture) LatestProgress).SetImage(Image.CreateFromData(LINES_OF_LON, LINES_OF_LAT, false, Image.Format.Rgb8, debugImage));
 
@@ -259,80 +321,133 @@ public static class Generator
 	public static void GenerateClimate()
 	{
 		GD.Print("Generating climate");
+		GD.Seed(seed + 2);
 
 		byte[] debugImage = new byte[LINES_OF_LON * LINES_OF_LAT * 3];
-
+		
 		AirCurrentMap = new Vector2[LINES_OF_LON][];
-
 		for (int x = 0; x < AirCurrentMap.Length; x++)
 		{
 			AirCurrentMap[x] = new Vector2[LINES_OF_LAT];
-			/*for (int y = 0; y < AirCurrentMap[x].Length; y++)
+			for (int y = 0; y < AirCurrentMap[x].Length; y++)
 			{
-				if (y == 0 || y == LINES_OF_LAT - 1 || ElevationMap[(x + 1) % LINES_OF_LON][y] < ElevationMap[x][y] || ElevationMap[(x + 3) % LINES_OF_LON][y] < -0.1)
+				AirCurrentMap[x][y] = ElevationMap[x][y] >= 0 ?
+					-SlopeMap[x][y].Normalized() * 2f * (SlopeMap[x][y].X + SlopeMap[x][y].Y):
+					Vector2.Right;
+				
+				if (AirCurrentMap[x][y].LengthSquared() < 0.1)
 					AirCurrentMap[x][y] = Vector2.Right;
 				else
-				{
-					float difference = 
-						(ElevationMap[(x + 1) % LINES_OF_LON][y + 1] + ElevationMap[(x + 2) % LINES_OF_LON][y + 1]) -
-						(ElevationMap[(x + 1) % LINES_OF_LON][y - 1] + ElevationMap[(x + 2) % LINES_OF_LON][y - 1]);
-					difference = Mathf.Clamp(2f * difference, -0.99f, 0.99f);
-					AirCurrentMap[x][y] = new Vector2(Mathf.Cos(difference), -Mathf.Sin(difference));
-				}
-			}*/
+					AirCurrentMap[x][y] *= new Vector2(Mathf.Sign(AirCurrentMap[x][y].X), 2f);//AirCurrentMap[x][y] with {X = Mathf.Abs(AirCurrentMap[x][y].X)};
+			}
 		}
-		for (int x = LINES_OF_LON - 1; x > 0; x--)
+
+
+		HumidityMap = new float[LINES_OF_LON][];
+		int[][] humiditySampleMap = new int[LINES_OF_LON][];
+		for (int x = 0; x < HumidityMap.Length; x++)
+		{
+			HumidityMap[x] = new float[LINES_OF_LAT];
+			humiditySampleMap[x] = new int[LINES_OF_LAT];
+			for (int y = 0; y < LINES_OF_LAT; y++)
+			{
+				HumidityMap[x][y] = 0f;
+				humiditySampleMap[x][y] = 0;
+			}
+		}
+		
+		for (int x = 0; x < LINES_OF_LON; x++)
 		{
 			for (int y = 0; y < LINES_OF_LAT; y++)
 			{
-				if (x != 359 && !AirCurrentMap[x][y].Equals(Vector2.Zero))
+				if (ElevationMap[x][y] > 0)
 					continue;
 
-				AirCurrentMap[x][y] = Vector2.Right;
-				List<Vector2I> frontier = new List<Vector2I>();
-				List<Vector2I> visited = new List<Vector2I>();
-				frontier.Add(new Vector2I(x, y));
+				float humidity = 1f;
+				Vector2 pos = new Vector2(x, y);
 
-				while (frontier.Count > 0)
+				for (int i = 0; i < 256; i++)
 				{
-					Vector2I pos = frontier[0];
-					frontier.RemoveAt(0);
-					visited.Add(pos);
+					pos += AirCurrentMap[x][y];
+					pos = pos with {Y = Mathf.Clamp(pos.Y, 0, LINES_OF_LAT - 1)};
 
-					for (int x2 = Math.Max(0, pos.X - 1); x2 <= pos.X; x2++)
+					if (pos.X >= 360)
+						pos.X -= 360;
+
+					HumidityMap[(int) pos.X][(int) pos.Y] += humidity;
+					humiditySampleMap[(int) pos.X][(int) pos.Y]++;
+
+					if (ElevationMap[(int) pos.X][(int) pos.Y] <= 0)
 					{
-						for (int y2 = Math.Max(0, pos.Y - 1); y2 <= MathF.Min(179, pos.Y + 1); y2++)
-						{
-							if (x2 == pos.X && y2 == pos.Y)
-								continue;
-
-							Vector2I newPos = new Vector2I(x2, y2);
-							if (!AirCurrentMap[newPos.X][newPos.Y].Equals(Vector2.Right) && (ElevationMap[pos.X][pos.Y] <= 0 || ElevationMap[newPos.X][newPos.Y] <= 0.02 + ElevationMap[pos.X][pos.Y]))
-							{
-								AirCurrentMap[newPos.X][newPos.Y] = new Vector2(pos.X - newPos.X, pos.Y - newPos.Y);
-								
-								if (newPos.X > 0 && !frontier.Contains(newPos) && !visited.Contains(newPos))
-									frontier.Add(newPos);
-							}
-						}
+						humidity += 0.035f;
+					} else {
+						humidity -= ElevationMap[(int) pos.X][(int) pos.Y] * 0.175f * humidity;
 					}
+
+					humidity = Mathf.Clamp(humidity, 0, 1);
 				}
 			}
 		}
-
 		for (int x = 0; x < LINES_OF_LON; x++)
 		{
 			for (int y = 0; y < LINES_OF_LAT; y++)
 			{
-				AirCurrentMap[x][y] = (AirCurrentMap[x][y] + new Vector2(1, 0)).Normalized();
+				HumidityMap[x][y] /= humiditySampleMap[x][y];
 			}
 		}
 
+		float[][] hhumidityMap = new float[LINES_OF_LON][];
+		const int KERNEL_SIZE = 3;
+		for (int x = 0; x < LINES_OF_LON; x++)
+		{
+			hhumidityMap[x] = new float[LINES_OF_LAT];
+			for (int y = 0; y < LINES_OF_LAT; y++)
+			{
+				float samples = 0;
+				for (int y2 = Mathf.Max(0, y - KERNEL_SIZE); y2 <= Mathf.Min(LINES_OF_LAT - 1, y + KERNEL_SIZE); y2++)
+				{
+					hhumidityMap[x][y] += HumidityMap[x][y2];
+					samples++;
+				}
+				hhumidityMap[x][y] /= samples;
+			}
+		}
 		for (int x = 0; x < LINES_OF_LON; x++)
 		{
 			for (int y = 0; y < LINES_OF_LAT; y++)
 			{
-				if (AirCurrentMap[x][y].IsEqualApprox(Vector2.Right))
+				float samples = 1;
+				for (int x2 = Mathf.Max(0, x - KERNEL_SIZE); x2 <= Mathf.Min(LINES_OF_LON - 1, x + KERNEL_SIZE); x2++)
+				{
+					HumidityMap[x][y] += hhumidityMap[x2][y];
+					samples++;
+				}
+				HumidityMap[x][y] /= samples;
+			}
+		}
+		
+		
+		TemperatureMap = new float[360][];
+		for (int x = 0; x < LINES_OF_LON; x++)
+		{
+			TemperatureMap[x] = new float[180];
+			for (int y = 0; y < LINES_OF_LAT; y++)
+			{
+				TemperatureMap[x][y] = (LINES_OF_LAT_HALF - Math.Abs(y - LINES_OF_LAT_HALF)) / 105f;
+				TemperatureMap[x][y] -= Math.Max(0, Mathf.Pow(ElevationMap[x][y] * 0.6f, 2f));
+
+				TemperatureMap[x][y] += noise.GetNoise2D(x * 8, y * 8) * 0.1f;
+
+				TemperatureMap[x][y] = Mathf.Clamp(TemperatureMap[x][y], 0, 1);
+			}
+		}
+
+
+		for (int x = 0; x < LINES_OF_LON; x++)
+		{
+			for (int y = 0; y < LINES_OF_LAT; y++)
+			{
+				/*if (AirCurrentMap[x][y].IsEqualApprox(Vector2.Right))
 				{
 					debugImage[(x + y * LINES_OF_LON) * 3 + 2] = (byte) (255 * ElevationMap[x][y]);
 				} else {
@@ -344,7 +459,9 @@ public static class Generator
 
 				if (ElevationMap[x][y] < 0) {
 					debugImage[(x + y * LINES_OF_LON) * 3 + 2] = 64;
-				}
+				}*/
+				debugImage[(x + y * LINES_OF_LON) * 3 + 0] = (byte) Mathf.Max(0, ElevationMap[x][y] * 255);
+				debugImage[(x + y * LINES_OF_LON) * 3 + 1] = (byte) (HumidityMap[x][y] * 255);
 			}
 		}
 
@@ -353,6 +470,42 @@ public static class Generator
 
 
 		ClimateGenerated = true;
+	}
+
+
+	public static void GenerateBiomes()
+	{
+		GD.Print("Generating biomes");
+		GD.Seed(seed + 3);
+
+		BiomeMap = new BiomeType[LINES_OF_LON][];
+		for (int x = 0; x < LINES_OF_LON; x++)
+		{
+			BiomeMap[x] = new BiomeType[LINES_OF_LAT];
+			for (int y = 0; y < LINES_OF_LAT; y++)
+			{
+				BiomeMap[x][y] = BiomeHelper.GetBiome(TemperatureMap[x][y], HumidityMap[x][y], ElevationMap[x][y]);
+			}
+		}
+
+		BiomesGenerated = true;
+
+		byte[] debugImage = new byte[LINES_OF_LON * LINES_OF_LAT * 3];
+		for (int x = 0; x < LINES_OF_LON; x++)
+		{
+			for (int y = 0; y < LINES_OF_LAT; y++)
+			{
+				Color c = BiomeHelper.GetBiomeColor(BiomeMap[x][y]);
+
+				debugImage[(x + y * LINES_OF_LON) * 3 + 0] = (byte) Math.Max(0, c.R8 - ElevationMap[x][y] * 32.0);
+				debugImage[(x + y * LINES_OF_LON) * 3 + 1] = (byte) Math.Max(0, c.G8 - ElevationMap[x][y] * 32.0);
+				debugImage[(x + y * LINES_OF_LON) * 3 + 2] = (byte) Math.Max(0, c.B8 - ElevationMap[x][y] * 32.0);
+			}
+		}
+
+		LatestProgress = new ImageTexture();
+		((ImageTexture) LatestProgress).SetImage(Image.CreateFromData(LINES_OF_LON, LINES_OF_LAT, false, Image.Format.Rgb8, debugImage));
+
 	}
 
 

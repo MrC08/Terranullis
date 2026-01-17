@@ -25,7 +25,7 @@ public partial class DebugGenerateWorld : Sprite2D
 			return;
 		}
 
-		Sprite2D test = (Sprite2D) GetNode("test");
+		/*Sprite2D test = (Sprite2D) GetNode("test");
 
 		for (int i = 0; i < 1000; i++)
 		{
@@ -49,8 +49,18 @@ public partial class DebugGenerateWorld : Sprite2D
 		if (pos.X > 0 && pos.Y > 0 && pos.X < 360 && pos.Y < 180)
 		{
 			cursor.Visible = true;
-			cursor.SetPointPosition(1, Generator.AirCurrentMap[pos.X][pos.Y] * 20);
+			cursor.SetPointPosition(1, Generator.AirCurrentMap[pos.X][pos.Y] * 150);
 		} else
-			cursor.Visible = false;
+			cursor.Visible = false;*/
+		
+		Label biomeText = (Label) GetNode("Biome");
+		biomeText.GlobalPosition = GetGlobalMousePosition() + new Vector2(24, 8);
+		Vector2I pos = new Vector2I((int) GetGlobalMousePosition().X / 2 + 180, (int) GetGlobalMousePosition().Y / 2 + 90);
+		if (pos.X > 0 && pos.Y > 0 && pos.X < 360 && pos.Y < 180)
+		{
+			biomeText.Visible = true;
+			biomeText.Text = Generator.BiomeMap[pos.X][pos.Y].ToString();
+		} else
+			biomeText.Visible = false;
 	}
 }

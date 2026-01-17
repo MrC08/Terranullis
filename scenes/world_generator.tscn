@@ -21,16 +21,24 @@ scale = Vector2(2, 2)
 script = ExtResource("1_b0nr5")
 
 [node name="test" type="Sprite2D" parent="Sprite2D"]
+visible = false
 z_index = 2
 texture = SubResource("GradientTexture2D_udtrs")
 
 [node name="AirOverlay" type="Sprite2D" parent="Sprite2D"]
+visible = false
 modulate = Color(1, 1, 1, 0.39215687)
 z_index = 1
 texture = SubResource("ImageTexture_b0nr5")
 
 [node name="Cursor" type="Line2D" parent="Sprite2D"]
+visible = false
 points = PackedVector2Array(0, 0, 10, 10)
 width = 2.0
+
+[node name="Biome" type="Label" parent="Sprite2D"]
+offset_right = 40.0
+offset_bottom = 23.0
+scale = Vector2(0.5, 0.5)
 
 [node name="Camera2D" type="Camera2D" parent="."]
