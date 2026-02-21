@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://cs5hhep0lin7l"]
+[gd_scene format=3 uid="uid://cs5hhep0lin7l"]
 
 [ext_resource type="Script" uid="uid://cajiepfijw2j0" path="res://cs/World.cs" id="1_sugp2"]
 [ext_resource type="PackedScene" uid="uid://dwuwtf8io6h4p" path="res://scenes/player.tscn" id="2_0xm2m"]
@@ -93,13 +93,13 @@ fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(0.5, 0)
 
-[node name="Node3D" type="Node3D"]
+[node name="Node3D" type="Node3D" unique_id=74101674]
 
-[node name="World" type="Node3D" parent="."]
+[node name="World" type="Node3D" parent="." unique_id=1955693116]
 script = ExtResource("1_sugp2")
 noiseArray = Array[Noise]([SubResource("FastNoiseLite_0wfyh"), SubResource("FastNoiseLite_sugp2"), SubResource("FastNoiseLite_jyhfs"), SubResource("FastNoiseLite_tbgi4")])
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="World" unique_id=482924805]
 environment = SubResource("Environment_1bvp3")
 script = ExtResource("2_jyhfs")
 zenithColorGradient = SubResource("Gradient_jyhfs")
@@ -110,7 +110,7 @@ horizonDuskColor = Color(1, 0.58, 0.39999998, 1)
 nadirDuskColor = Color(0.87, 0.3306, 0.33958986, 1)
 nightGradient = SubResource("Gradient_o6xl0")
 
-[node name="Sun" type="DirectionalLight3D" parent="World/WorldEnvironment"]
+[node name="Sun" type="DirectionalLight3D" parent="World/WorldEnvironment" unique_id=1249947181]
 transform = Transform3D(2.4044422e-08, -0.83511674, -0.5500727, -3.650409e-08, -0.5500727, 0.83511674, -1, 9.380479e-15, -4.371136e-08, 0, 0, 0)
 light_bake_mode = 0
 shadow_enabled = true
@@ -120,23 +120,23 @@ shadow_blur = 2.0
 shadow_caster_mask = 4294966273
 directional_shadow_blend_splits = true
 
-[node name="ChunkManager" type="Node3D" parent="World"]
+[node name="ChunkManager" type="Node3D" parent="World" unique_id=1367725049]
 
-[node name="LODManager" type="Node3D" parent="World"]
+[node name="LODManager" type="Node3D" parent="World" unique_id=1777251141]
 
-[node name="Player" parent="World" instance=ExtResource("2_0xm2m")]
+[node name="Player" parent="World" unique_id=2095982269 instance=ExtResource("2_0xm2m")]
 process_priority = -1
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 256, 0)
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="World"]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="World" unique_id=716053541]
 stream = ExtResource("5_tipki")
 volume_db = -8.0
 autoplay = true
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1230781501]
 follow_viewport_enabled = true
 
-[node name="ColorRect3" type="ColorRect" parent="CanvasLayer"]
+[node name="ColorRect3" type="ColorRect" parent="CanvasLayer" unique_id=1084245568]
 texture_filter = 1
 material = SubResource("ShaderMaterial_tbgi4")
 anchors_preset = 15
@@ -145,7 +145,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ColorRect2" type="ColorRect" parent="CanvasLayer"]
+[node name="ColorRect2" type="ColorRect" parent="CanvasLayer" unique_id=444920644]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -158,7 +158,7 @@ offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ColorRect2" type="ColorRect" parent="CanvasLayer/ColorRect2"]
+[node name="ColorRect2" type="ColorRect" parent="CanvasLayer/ColorRect2" unique_id=731235316]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -172,7 +172,7 @@ offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="DebugMenu" type="Control" parent="CanvasLayer"]
+[node name="DebugMenu" type="Control" parent="CanvasLayer" unique_id=690462764]
 texture_filter = 1
 layout_mode = 3
 anchors_preset = 15
@@ -182,28 +182,28 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("6_o6xl0")
 
-[node name="TopLeft" type="VBoxContainer" parent="CanvasLayer/DebugMenu"]
+[node name="TopLeft" type="VBoxContainer" parent="CanvasLayer/DebugMenu" unique_id=1559770909]
 layout_mode = 1
 offset_right = 40.0
 offset_bottom = 40.0
 scale = Vector2(2, 2)
 
-[node name="Position" type="Label" parent="CanvasLayer/DebugMenu/TopLeft"]
+[node name="Position" type="Label" parent="CanvasLayer/DebugMenu/TopLeft" unique_id=1265486884]
 layout_mode = 2
 text = "Pos:"
 label_settings = ExtResource("6_tefeu")
 
-[node name="Velocity" type="Label" parent="CanvasLayer/DebugMenu/TopLeft"]
+[node name="Velocity" type="Label" parent="CanvasLayer/DebugMenu/TopLeft" unique_id=53468000]
 layout_mode = 2
 text = "Vel:"
 label_settings = ExtResource("6_tefeu")
 
-[node name="Rotation" type="Label" parent="CanvasLayer/DebugMenu/TopLeft"]
+[node name="Rotation" type="Label" parent="CanvasLayer/DebugMenu/TopLeft" unique_id=971567425]
 layout_mode = 2
 text = "Rot:"
 label_settings = ExtResource("6_tefeu")
 
-[node name="TopRight" type="VBoxContainer" parent="CanvasLayer/DebugMenu"]
+[node name="TopRight" type="VBoxContainer" parent="CanvasLayer/DebugMenu" unique_id=469065816]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -214,42 +214,42 @@ grow_horizontal = 0
 scale = Vector2(2, 2)
 pivot_offset = Vector2(116, 0)
 
-[node name="FPS" type="HBoxContainer" parent="CanvasLayer/DebugMenu/TopRight"]
+[node name="FPS" type="HBoxContainer" parent="CanvasLayer/DebugMenu/TopRight" unique_id=174444445]
 layout_mode = 2
 
-[node name="Counter" type="Label" parent="CanvasLayer/DebugMenu/TopRight/FPS"]
+[node name="Counter" type="Label" parent="CanvasLayer/DebugMenu/TopRight/FPS" unique_id=189547399]
 layout_mode = 2
 text = "XXXXX"
 label_settings = ExtResource("6_tefeu")
 horizontal_alignment = 2
 
-[node name="Text" type="Label" parent="CanvasLayer/DebugMenu/TopRight/FPS"]
+[node name="Text" type="Label" parent="CanvasLayer/DebugMenu/TopRight/FPS" unique_id=1773786553]
 layout_mode = 2
 text = "fps"
 label_settings = ExtResource("6_tefeu")
 horizontal_alignment = 2
 
-[node name="AverageFPS" type="HBoxContainer" parent="CanvasLayer/DebugMenu/TopRight"]
+[node name="AverageFPS" type="HBoxContainer" parent="CanvasLayer/DebugMenu/TopRight" unique_id=1552656317]
 layout_mode = 2
 
-[node name="Counter" type="Label" parent="CanvasLayer/DebugMenu/TopRight/AverageFPS"]
+[node name="Counter" type="Label" parent="CanvasLayer/DebugMenu/TopRight/AverageFPS" unique_id=1667968754]
 layout_mode = 2
 text = "XXXXX"
 label_settings = ExtResource("6_tefeu")
 horizontal_alignment = 2
 
-[node name="Text" type="Label" parent="CanvasLayer/DebugMenu/TopRight/AverageFPS"]
+[node name="Text" type="Label" parent="CanvasLayer/DebugMenu/TopRight/AverageFPS" unique_id=1373771049]
 layout_mode = 2
 text = "fps (avg)"
 label_settings = ExtResource("6_tefeu")
 horizontal_alignment = 2
 
-[node name="ResetAverageFPS" type="Timer" parent="CanvasLayer/DebugMenu"]
+[node name="ResetAverageFPS" type="Timer" parent="CanvasLayer/DebugMenu" unique_id=2017545625]
 wait_time = 5.0
 autostart = true
 ignore_time_scale = true
 
-[node name="CompTime" type="Label" parent="CanvasLayer/DebugMenu"]
+[node name="CompTime" type="Label" parent="CanvasLayer/DebugMenu" unique_id=1913713818]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -262,7 +262,7 @@ pivot_offset = Vector2(0, 22)
 text = "Cmp. time:"
 label_settings = ExtResource("6_tefeu")
 
-[node name="TextureRect" type="TextureRect" parent="CanvasLayer"]
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer" unique_id=2042152952]
 texture_filter = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -278,7 +278,7 @@ grow_vertical = 2
 texture = SubResource("PlaceholderTexture2D_85g3d")
 script = ExtResource("9_85g3d")
 
-[node name="Marker" type="TextureRect" parent="CanvasLayer/TextureRect"]
+[node name="Marker" type="TextureRect" parent="CanvasLayer/TextureRect" unique_id=87164593]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.007

@@ -88,7 +88,7 @@ void fragment() {
 	ALPHA *= albedo_tex.a;
 	ALPHA_SCISSOR_THRESHOLD = 0.5;
 
-	float smoothness = texture(smoothness_map, uv).r * 0.5;
+	float smoothness = texture(smoothness_map, uv).r * 0.75;
 	ROUGHNESS = 1.0 - smoothness;
 	SPECULAR = smoothness;
 	METALLIC = smoothness;
