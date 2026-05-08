@@ -1,7 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://dwuwtf8io6h4p"]
+[gd_scene format=3 uid="uid://dwuwtf8io6h4p"]
 
 [ext_resource type="Script" uid="uid://yf7iyl8hnv6g" path="res://cs/Player.cs" id="1_3vyb7"]
 [ext_resource type="Shader" uid="uid://dbss6102fnn4s" path="res://res/raymarch.gdshader" id="2_g2els"]
+[ext_resource type="Shader" uid="uid://cw4d5fyot6mfw" path="res://res/ultrafarlod.gdshader" id="3_qhqgy"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sh265"]
 radius = 0.4
@@ -27,38 +28,55 @@ shader = ExtResource("2_g2els")
 flip_faces = true
 size = Vector2(2, 2)
 
-[node name="Player" type="CharacterBody3D"]
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_dqkch"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qlg0r"]
+render_priority = 0
+shader = ExtResource("3_qhqgy")
+shader_parameter/heightmap = SubResource("PlaceholderTexture2D_dqkch")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_g2els"]
+size = Vector2(8192, 8192)
+subdivide_width = 64
+subdivide_depth = 64
+
+[node name="Player" type="CharacterBody3D" unique_id=14972779]
 script = ExtResource("1_3vyb7")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=465437091]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_sh265")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1601647901]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 mesh = SubResource("CapsuleMesh_sh265")
 
-[node name="RayCast3D" type="RayCast3D" parent="."]
+[node name="RayCast3D" type="RayCast3D" parent="." unique_id=1266406676]
 transform = Transform3D(1, 0, 0, 0, -4.3711392e-08, 1.0000001, 0, -1.0000001, -4.3711392e-08, 0, 1.5, 0)
 target_position = Vector3(0, 0, -10)
 debug_shape_custom_color = Color(1, 1, 1, 1)
 debug_shape_thickness = 5
 
-[node name="Node3D" type="Node3D" parent="RayCast3D"]
+[node name="Node3D" type="Node3D" parent="RayCast3D" unique_id=138277478]
 transform = Transform3D(1, 0, 0, 0, -4.3711392e-08, 1.0000001, 0, -1.0000001, -4.3711392e-08, 0, 1.5, 0)
 top_level = true
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="RayCast3D/Node3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RayCast3D/Node3D" unique_id=1467459983]
 mesh = SubResource("BoxMesh_3vyb7")
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1323247333]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 fov = 80.0
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Camera3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Camera3D" unique_id=277335671]
 visible = false
 material_override = SubResource("ShaderMaterial_qhqgy")
 cast_shadow = 0
 extra_cull_margin = 16384.0
 ignore_occlusion_culling = true
 mesh = SubResource("QuadMesh_dqkch")
+
+[node name="UltraFarLOD" type="MeshInstance3D" parent="." unique_id=864118393]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -64, 0)
+material_override = SubResource("ShaderMaterial_qlg0r")
+mesh = SubResource("PlaneMesh_g2els")
