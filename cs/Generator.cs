@@ -29,6 +29,7 @@ public static class Generator
 	public static float[][] ElevationMap;
 	public static float[][] SmoothElevationMap;
 	public static Vector2[][] SlopeMap;
+	public static ImageTexture ShaderReadyElevationMap;
 
 	public static bool ClimateGenerated = false;
 	public static Vector2[][] AirCurrentMap;
@@ -333,6 +334,17 @@ public static class Generator
 				SlopeMap[x][y] = new Vector2(dx, dy);
 			}
 		}
+
+
+		Image elevationImg = Image.CreateEmpty(360, 180, false, Image.Format.Rgb8);
+		for (int latitude = 0; latitude < 180; latitude++) {
+			for (int longitude = 0; longitude < 360; longitude++) {
+				float elevation = MathF.Max(0f, Generator.ElevationMap[longitude][latitude]);
+				elevationImg.SetPixel(longitude, latitude, new Color(elevation, elevation, elevation));
+			}
+		}
+		ShaderReadyElevationMap = ImageTexture.CreateFromImage(elevationImg);
+
 
 		LatestProgress = new ImageTexture();
 		((ImageTexture) LatestProgress).SetImage(Image.CreateFromData(LINES_OF_LON, LINES_OF_LAT, false, Image.Format.Rgb8, debugImage));

@@ -78,5 +78,6 @@ mesh = SubResource("QuadMesh_dqkch")
 
 [node name="UltraFarLOD" type="MeshInstance3D" parent="." unique_id=864118393]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -64, 0)
+visible = false
 material_override = SubResource("ShaderMaterial_qlg0r")
 mesh = SubResource("PlaneMesh_g2els")

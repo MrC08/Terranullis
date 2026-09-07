@@ -49,6 +49,7 @@ public partial class World : Node3D
 	public override void _Process(double delta)
 	{
 		tick++;
+		ulong currentTimeUsec = Time.GetTicksUsec();
 
 		bool chunkActivityThisFrame = false;
 
@@ -74,11 +75,6 @@ public partial class World : Node3D
 		}
 
 		chunkCompiler.wait();
-
-		if (Chunk.AmountCompiled > 1000)
-		{
-			Chunk.AmountCompiled /= 2;
-		}
 
 		for (x = (int) (player.Position.X / Chunk.CHUNK_SIZE) - 1; x <= (int) (player.Position.X / Chunk.CHUNK_SIZE) + 1; x++) {
 			for (int y = -1; y <= 1; y++) {
@@ -119,7 +115,7 @@ public partial class World : Node3D
 					chunkActivityThisFrame = true;
 				}
 			} else {
-				c.Visible = true;
+				c.Visible = !c.visuallyEmpty;
 
 				if (!c.generated)
 				{
@@ -137,6 +133,8 @@ public partial class World : Node3D
 						chunksToCompile.Insert((int) Math.Min(dist_sq / 8, chunksToCompile.Count), c);
 
 					chunkActivityThisFrame = true;
+				} else if (c.compiledWithIncompleteSurroundings && c.lastCompiledTime + 5_000_000 <= currentTimeUsec) {
+					c.needsCompilation = true;
 				}
 			}
 		}
@@ -201,7 +199,10 @@ public partial class World : Node3D
 
 	public ulong GetBlock(int x, int y, int z, ulong fallback)
 	{
-		if (y > 255 || y < -128)
+		if (y < -128)
+			return 1;
+
+		if (y > 255)
 			return fallback;
 
 		int hash = Util.WorldPosToChunkName(new Vector3(x, y, z));
@@ -267,11 +268,11 @@ public partial class World : Node3D
 		int y = gy % Chunk.CHUNK_VSIZE;
 		int z = gz % Chunk.CHUNK_SIZE;
 
-		if (gx < 0)
+		if (x < 0)
 			x += Chunk.CHUNK_SIZE;
-		if (gy < 0)
+		if (y < 0)
 			y += Chunk.CHUNK_VSIZE;
-		if (gz < 0)
+		if (z < 0)
 			z += Chunk.CHUNK_SIZE;
 
 		chunk.SetBlock(x, y, z, block);

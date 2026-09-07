@@ -21,6 +21,9 @@ public partial class Chunk : Node3D, ICompilable
 	public bool needsCompilation;
 	public bool generated = false;
 	public Vector2 Position2D;
+	public bool compiledWithIncompleteSurroundings = false;
+	public ulong lastCompiledTime = 0;
+	public bool visuallyEmpty = false;
 
 	public int hash;
 
@@ -28,6 +31,8 @@ public partial class Chunk : Node3D, ICompilable
 	{
 		meshInstance = (MeshInstance3D) GetNode("MeshInstance3D");
 		collisionShape = (CollisionShape3D) GetNode("RigidBody3D/CollisionShape3D");
+
+		((ShaderMaterial) meshInstance.MaterialOverride).SetShaderParameter("world_elevation_map", Generator.ShaderReadyElevationMap);
 
 		needsCompilation = true;
 	}
@@ -200,7 +205,14 @@ public partial class Chunk : Node3D, ICompilable
 			cachedBlockdataZN = chunk.blockData;
 		else if (!forceCompile)
 			return -1;
-		
+
+		compiledWithIncompleteSurroundings = (
+			cachedBlockdataXN == null ||
+			cachedBlockdataXP == null ||
+			cachedBlockdataZN == null ||
+			cachedBlockdataZP == null
+		);
+
 		Face xp = new Face();
 		Face xn = new Face();
 		Face yp = new Face();
@@ -330,17 +342,21 @@ public partial class Chunk : Node3D, ICompilable
 			ArrayMesh newMesh = new ArrayMesh();
 			newMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
 			new Callable(this, nameof(SetNewMesh)).CallDeferred(newMesh);
+
+			visuallyEmpty = false;
+		} else {
+			visuallyEmpty = true;
 		}
 
 		needsCompilation = false;
 
-		double end_t = Time.GetTicksUsec();
+		lastCompiledTime = Time.GetTicksUsec();
 		AmountCompiled++;
 		AverageTime *= ((double) AmountCompiled - 1) / AmountCompiled;
-		AverageTime += (end_t - t) * 0.001 / AmountCompiled;
+		AverageTime += (lastCompiledTime - t) * 0.001 / AmountCompiled;
 		
 		//GD.Print("Took msec: ", (end_t - t) * 0.001);
-		return (end_t - t) * 0.001;
+		return (lastCompiledTime - t) * 0.001;
 	}
 
 	public void SetNewMesh(ArrayMesh newMesh)

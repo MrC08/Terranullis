@@ -26,16 +26,7 @@ public partial class Player : CharacterBody3D
 		
 		camera.MakeCurrent();
 
-		Image elevationImg = Image.CreateEmpty(360, 180, false, Image.Format.Rgb8);
-		for (int latitude = 0; latitude < 180; latitude++) {
-			for (int longitude = 0; longitude < 360; longitude++) {
-				float elevation = MathF.Max(0f, Generator.ElevationMap[longitude][latitude]);
-				elevationImg.SetPixel(longitude, latitude, new Color(elevation, elevation, elevation));
-			}
-		}
-		Texture2D elevationTexture = ImageTexture.CreateFromImage(elevationImg);
-
-		((ShaderMaterial) ultraFarLOD.MaterialOverride).SetShaderParameter("heightmap", elevationTexture);
+		((ShaderMaterial) ultraFarLOD.MaterialOverride).SetShaderParameter("heightmap", Generator.ShaderReadyElevationMap);
 	}
 
 

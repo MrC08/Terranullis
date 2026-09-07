@@ -1,9 +1,9 @@
 shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx, skip_vertex_transform;
 
-
 uniform sampler2D texture_albedo : source_color, filter_nearest, repeat_enable;
 uniform sampler2D smoothness_map : source_color, filter_nearest, repeat_enable;
+uniform sampler2D world_elevation_map;
 
 uniform bool lod;
 

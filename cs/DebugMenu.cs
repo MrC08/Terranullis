@@ -11,6 +11,7 @@ public partial class DebugMenu : Control
 	Label fps;
 	Label fpsAvg;
 	Label compTime;
+	Label compAmount;
 
 	double averageFPS;
 	ulong averageFPScount;
@@ -26,6 +27,7 @@ public partial class DebugMenu : Control
 		fps = (Label) GetNode("TopRight/FPS/Counter");
 		fpsAvg = (Label) GetNode("TopRight/AverageFPS/Counter");
 		compTime = (Label) GetNode("CompTime");
+		compAmount = (Label) GetNode("CompAmount");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -35,6 +37,7 @@ public partial class DebugMenu : Control
 		rot.Text = "Rot: " + ((((Camera3D) player.GetNode("Camera3D")).GlobalRotationDegrees * 100).Round() / 100).ToString();
 		vel.Text = "Vel: " + ((player.Velocity * 100).Round() / 100).ToString();
 		compTime.Text = "Cmp. time: " + Math.Round(Chunk.AverageTime, 2).ToString() + "ms";
+		compAmount.Text = "Cmp. amount: " + Chunk.AmountCompiled.ToString();
 
 		double fpsTime = Engine.GetFramesPerSecond();
 		averageFPScount++;
