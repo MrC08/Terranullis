@@ -55,7 +55,7 @@ public static class Generator
 		{
 			for (float lon = -LINES_OF_LON_HALF; lon < LINES_OF_LON_HALF; lon += 0.25f)
 			{
-				Vector2 pos = Util.CoordsToWorldPos(lat, lon);
+				Vector2 pos = Util.CoordsToAbsPos(lat, lon);
 				int height = HeightAtPos(pos, true);
 				globalNoise[GetGlobalNoiseIndex(lat, lon)] = height;
 			}

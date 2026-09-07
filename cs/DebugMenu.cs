@@ -33,7 +33,7 @@ public partial class DebugMenu : Control
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		pos.Text = "Pos: " + ((player.GlobalPosition * 100).Round() / 100).ToString();
+		pos.Text = "Pos: " + ((Util.SmartPosToAbsPos(player.GlobalPosition) * 100).Round() / 100).ToString();
 		rot.Text = "Rot: " + ((((Camera3D) player.GetNode("Camera3D")).GlobalRotationDegrees * 100).Round() / 100).ToString();
 		vel.Text = "Vel: " + ((player.Velocity * 100).Round() / 100).ToString();
 		compTime.Text = "Cmp. time: " + Math.Round(Chunk.AverageTime, 2).ToString() + "ms";

@@ -6,9 +6,11 @@ public partial class DebugMeshAABB : MeshInstance3D
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		if (((Chunk)GetParent().GetParent()).Position2D.X % 5 != 0)
+		Vector2 pos2D = Util.GetXZ(((Chunk)GetParent().GetParent()).Position);
+
+		if (pos2D.X % 5 != 0)
 			QueueFree();
-		if (((Chunk)GetParent().GetParent()).Position2D.Y % 5 != 0)
+		if (pos2D.Y % 5 != 0)
 			QueueFree();
 
 		if (((Chunk)GetParent().GetParent()).needsCompilation)

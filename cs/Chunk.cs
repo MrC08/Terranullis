@@ -20,7 +20,6 @@ public partial class Chunk : Node3D, ICompilable
 	public BlockData blockData;
 	public bool needsCompilation;
 	public bool generated = false;
-	public Vector2 Position2D;
 	public bool compiledWithIncompleteSurroundings = false;
 	public ulong lastCompiledTime = 0;
 	public bool visuallyEmpty = false;
@@ -45,16 +44,15 @@ public partial class Chunk : Node3D, ICompilable
 
 		blockData = new BlockData();
 
-		hash = Util.WorldPosToChunkName(GlobalPosition);
+		hash = Util.AbsPosToChunkName(Util.SmartPosToAbsPos(GlobalPosition));
 		Name = hash.ToString();
-
-		Position2D = new Vector2(GlobalPosition.X, GlobalPosition.Z);
 	}
 
 	public ulong GetBlock(int x, int y, int z, ulong fallback)
 	{
+		Vector3 pos = Util.SmartPosToAbsPos(GlobalPosition);
 		if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_VSIZE || z < 0 || z >= CHUNK_SIZE)
-			return world.GetBlock((int) GlobalPosition.X + x, (int) GlobalPosition.Y + y, (int) GlobalPosition.Z + z, fallback);
+			return world.GetBlock((int) pos.X + x, (int) pos.Y + y, (int) pos.Z + z, fallback);
 		
 		return blockData.Get(x, y, z);
 	}
@@ -87,9 +85,10 @@ public partial class Chunk : Node3D, ICompilable
 		{
 			return cachedBlockdataZP.Get(x, y, z - CHUNK_SIZE);
 		}
-		
+
+		Vector3 pos = Util.SmartPosToAbsPos(GlobalPosition);
 		if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_VSIZE || z < 0 || z >= CHUNK_SIZE)
-			return world.GetBlock((int) GlobalPosition.X + x, (int) GlobalPosition.Y + y, (int) GlobalPosition.Z + z, 0);
+			return world.GetBlock((int) pos.X + x, (int) pos.Y + y, (int) pos.Z + z, 0);
 		
 		return blockData.Get(x, y, z);
 	}
@@ -124,7 +123,9 @@ public partial class Chunk : Node3D, ICompilable
 
 	public void Generate()
 	{
-		int[] heightmap = Generator.GenerateHeightmap(GlobalPosition, CHUNK_SIZE, CHUNK_SIZE, false);
+		Vector3 pos = Util.SmartPosToAbsPos(GlobalPosition);
+
+		int[] heightmap = Generator.GenerateHeightmap(pos, CHUNK_SIZE, CHUNK_SIZE, false);
 
 		for (int x = 0; x < CHUNK_SIZE; x++)
 		{
@@ -132,11 +133,11 @@ public partial class Chunk : Node3D, ICompilable
 			{
 				int height = heightmap[x + z * CHUNK_SIZE];
 
-				int topGenerate = Math.Min(height - (int) GlobalPosition.Y, CHUNK_VSIZE - 1);
+				int topGenerate = Math.Min(height - (int) pos.Y, CHUNK_VSIZE - 1);
 
 				for (int y = topGenerate; y >= 0; y--)
 				{
-					if (y == topGenerate && topGenerate == height - (int) GlobalPosition.Y)
+					if (y == topGenerate && topGenerate == height - (int) pos.Y)
 					{
 						SetBlock(x, y, z, 1);
 					} else {
@@ -144,7 +145,7 @@ public partial class Chunk : Node3D, ICompilable
 					}
 				}
 
-				if (GlobalPosition.Y <= -1)
+				if (pos.Y <= -1)
 				{
 					for (int y = CHUNK_VSIZE - 1; y > topGenerate; y--)
 					{
@@ -185,22 +186,24 @@ public partial class Chunk : Node3D, ICompilable
 		
 		int index = 0;
 
-		Chunk chunk = world.WorldPosToChunk(GlobalPosition + new Vector3(16, 0, 0));
+		Vector3 pos = Util.SmartPosToAbsPos(GlobalPosition);
+
+		Chunk chunk = world.WorldPosToChunk(pos + new Vector3(16, 0, 0));
 		if (chunk != null)
 			cachedBlockdataXP = chunk.blockData;
 		else if (!forceCompile)
 			return -1;
-		chunk = world.WorldPosToChunk(GlobalPosition + new Vector3(-16, 0, 0));
+		chunk = world.WorldPosToChunk(pos + new Vector3(-16, 0, 0));
 		if (chunk != null)
 			cachedBlockdataXN = chunk.blockData;
 		else if (!forceCompile)
 			return -1;
-		chunk = world.WorldPosToChunk(GlobalPosition + new Vector3(0, 0, 16));
+		chunk = world.WorldPosToChunk(pos + new Vector3(0, 0, 16));
 		if (chunk != null)
 			cachedBlockdataZP = chunk.blockData;
 		else if (!forceCompile)
 			return -1;
-		chunk = world.WorldPosToChunk(GlobalPosition + new Vector3(0, 0, -16));
+		chunk = world.WorldPosToChunk(pos + new Vector3(0, 0, -16));
 		if (chunk != null)
 			cachedBlockdataZN = chunk.blockData;
 		else if (!forceCompile)

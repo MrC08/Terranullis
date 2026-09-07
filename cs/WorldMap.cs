@@ -19,7 +19,7 @@ public partial class WorldMap : TextureRect
 	{
 		Texture = Generator.LatestProgress;
 
-		Vector2 markerPos = new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z);
+		Vector2 markerPos = Util.SmartPosToAbsPosXZ(player.GlobalPosition);
 		markerPos /= 500f;
 
 		markerPos.X += 180f;
@@ -53,7 +53,7 @@ public partial class WorldMap : TextureRect
 
 				Visible = !Visible;
 
-				player.GlobalPosition = pos;
+				player.GlobalPosition = Util.AbsPosToSmartPos(pos);
 			}
 		}
 	}

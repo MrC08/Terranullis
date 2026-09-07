@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Collections.Generic;
 
 public partial class LOD : Node3D, ICompilable
@@ -29,7 +28,7 @@ public partial class LOD : Node3D, ICompilable
 
 		meshInstance.Mesh = new ArrayMesh();
 
-		hash = Util.WorldPosToChunkName(GlobalPosition);
+		hash = Util.SmartPosToChunkName(GlobalPosition);
 		Name = hash.ToString();
 	}
 
@@ -56,7 +55,7 @@ public partial class LOD : Node3D, ICompilable
 		
 		int index = 0;
 
-		int[] noiseMap = Generator.GenerateHeightmap(GlobalPosition, LOD_SIZE + 1, LOD_SIZE + 1, false);
+		int[] noiseMap = Generator.GenerateHeightmap(Util.SmartPosToAbsPos(GlobalPosition), LOD_SIZE + 1, LOD_SIZE + 1, false);
 
 		for (int x = 0; x < LOD_SIZE; x++) {
 			for (int z = 0; z < LOD_SIZE; z++) {

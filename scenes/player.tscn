@@ -34,9 +34,12 @@ size = Vector2(2, 2)
 render_priority = 0
 shader = ExtResource("3_qhqgy")
 shader_parameter/heightmap = SubResource("PlaceholderTexture2D_dqkch")
+shader_parameter/offset = Vector2(0, 0)
+shader_parameter/near_limit = 0.0
+shader_parameter/far_color = Vector3(0, 0, 0)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_g2els"]
-size = Vector2(8192, 8192)
+size = Vector2(16384, 16384)
 subdivide_width = 64
 subdivide_depth = 64
 
@@ -78,6 +81,5 @@ mesh = SubResource("QuadMesh_dqkch")
 
 [node name="UltraFarLOD" type="MeshInstance3D" parent="." unique_id=864118393]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -64, 0)
-visible = false
 material_override = SubResource("ShaderMaterial_qlg0r")
 mesh = SubResource("PlaneMesh_g2els")

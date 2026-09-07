@@ -94,6 +94,9 @@ public partial class Player : CharacterBody3D
 
 		ultraFarLOD.GlobalPosition = ((GlobalPosition / 32f).Floor() * 32f) with {Y = 0f};
 		ultraFarLOD.GlobalRotation = Vector3.Zero;
+		((ShaderMaterial) ultraFarLOD.MaterialOverride).SetShaderParameter("offset", new Vector2(Util.smartPosOffsetX, Util.smartPosOffsetZ));
+		((ShaderMaterial) ultraFarLOD.MaterialOverride).SetShaderParameter("near_limit", (world.primaryRenderLODDistance - 6) * LOD.LOD_SIZE);
+		((ShaderMaterial) ultraFarLOD.MaterialOverride).SetShaderParameter("far_color", new Vector3(0.3f, 0.5f, 0.7f)); // TODO: Make this change with the day/night cycle
 	}
 
 
@@ -134,12 +137,12 @@ public partial class Player : CharacterBody3D
 				} else if (buttonEvent.ButtonIndex == MouseButton.Left)
 				{
 					if (raycast.IsColliding())
-						world.SetBlock(raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * -0.01f, 0);
+						world.SetBlock(Util.SmartPosToAbsPos(raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * -0.01f), 0);
 						UpdateRaycast(true);
 				} else if (buttonEvent.ButtonIndex == MouseButton.Right)
 				{
 					if (raycast.IsColliding())
-						world.SetBlock(raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * 0.01f, 2);
+						world.SetBlock(Util.SmartPosToAbsPos(raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * 0.01f), 2);
 						UpdateRaycast(true);
 				}
 			}

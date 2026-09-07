@@ -11,7 +11,7 @@ public partial class World : Node3D
 	readonly PackedScene LODScene = (PackedScene) ResourceLoader.Load("res://scenes/lod.tscn");
 	public Node3D chunkManager;
 	public Node3D LODManager;
-	CharacterBody3D player;
+	public CharacterBody3D player;
 	ChunkCompiler chunkCompiler;
 	[Export] Noise[] noiseArray;
 
@@ -20,7 +20,7 @@ public partial class World : Node3D
 
 	public int primaryRenderDistance = 16;
 	public int primaryLoadDistance = 20;
-	public int primaryRenderLODDistance = 24;
+	public int primaryRenderLODDistance = 32;
 
 	private int tick = 0;
 	private double chunksCompiled = 0;
@@ -53,21 +53,24 @@ public partial class World : Node3D
 
 		bool chunkActivityThisFrame = false;
 
-		int x = (int) (player.Position.X / Chunk.CHUNK_SIZE) - primaryLoadDistance + (tick % (primaryLoadDistance * 2));
+		Vector3 playerSmartPos = player.Position;
+		Vector2 playerSmartPosXZ = Util.GetXZ(playerSmartPos);
+
+		int x = (int) (playerSmartPos.X / Chunk.CHUNK_SIZE) - primaryLoadDistance + (tick % (primaryLoadDistance * 2));
 		for (int y = -1; y <= 1; y++)
 		{
-			for (int z = (int) (player.Position.Z / Chunk.CHUNK_SIZE - primaryLoadDistance); z < (int) (player.Position.Z / Chunk.CHUNK_SIZE + primaryLoadDistance); z++)
+			for (int z = (int) (playerSmartPos.Z / Chunk.CHUNK_SIZE - primaryLoadDistance); z < (int) (playerSmartPos.Z / Chunk.CHUNK_SIZE + primaryLoadDistance); z++)
 			{
 				Vector3 pos = new Vector3(x, y, z);
 
-				if (new Vector2(pos.X * Chunk.CHUNK_SIZE, pos.Z * Chunk.CHUNK_SIZE).DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) >= Math.Pow(primaryLoadDistance * Chunk.CHUNK_SIZE, 2))
+				if (new Vector2(pos.X * Chunk.CHUNK_SIZE, pos.Z * Chunk.CHUNK_SIZE).DistanceSquaredTo(playerSmartPosXZ) >= Math.Pow(primaryLoadDistance * Chunk.CHUNK_SIZE, 2))
 					continue;
 
-				int hash = Util.ChunkPosToChunkName(pos);
+				int hash = Util.ChunkPosToChunkName(Util.SmartChunkPosToChunkPos(pos));
 
 				if (!chunkMap.ContainsKey(hash))
 				{
-					CreateChunk(pos);
+					CreateChunk(Util.SmartChunkPosToChunkPos(pos));
 
 					chunkActivityThisFrame = true;
 				}
@@ -76,10 +79,14 @@ public partial class World : Node3D
 
 		chunkCompiler.wait();
 
-		for (x = (int) (player.Position.X / Chunk.CHUNK_SIZE) - 1; x <= (int) (player.Position.X / Chunk.CHUNK_SIZE) + 1; x++) {
+		Util.UpdateSmartCoordinateOffset(this);
+		playerSmartPos = player.Position;
+		playerSmartPosXZ = Util.GetXZ(playerSmartPos);
+
+		for (x = (int) (playerSmartPos.X / Chunk.CHUNK_SIZE) - 1; x <= (int) (playerSmartPos.X / Chunk.CHUNK_SIZE) + 1; x++) {
 			for (int y = -1; y <= 1; y++) {
-				for (int z = (int) (player.Position.Z / Chunk.CHUNK_SIZE) - 1; z <= (int) (player.Position.Z / Chunk.CHUNK_SIZE) + 1; z++) {
-					Vector3 pos = new Vector3(x, y, z);
+				for (int z = (int) (playerSmartPos.Z / Chunk.CHUNK_SIZE) - 1; z <= (int) (playerSmartPos.Z / Chunk.CHUNK_SIZE) + 1; z++) {
+					Vector3 pos = Util.SmartChunkPosToChunkPos(new Vector3(x, y, z));
 					int hash = Util.ChunkPosToChunkName(pos);
 					if (!chunkMap.ContainsKey(hash))
 					{
@@ -100,7 +107,7 @@ public partial class World : Node3D
 		foreach (int hash in hashes)
 		{
 			Chunk c = chunkMap[hash];
-			float dist_sq = c.Position2D.DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z));
+			float dist_sq = Util.GetXZ(c.Position).DistanceSquaredTo(playerSmartPosXZ);
 
 			if (dist_sq > Math.Pow((primaryRenderDistance + 1) * 16, 2))
 			{
@@ -144,12 +151,12 @@ public partial class World : Node3D
 
 		if (!chunkActivityThisFrame && !chunkActivityLastFrame)
 		{
-			x = (int) (player.Position.X / LOD.LOD_SIZE) - primaryRenderLODDistance + (tick % (primaryRenderLODDistance * 2));
-			for (int z = (int) (player.Position.Z / LOD.LOD_SIZE - primaryRenderLODDistance); z < (int) (player.Position.Z / LOD.LOD_SIZE + primaryRenderLODDistance); z++)
+			x = (int) (playerSmartPos.X / LOD.LOD_SIZE) - primaryRenderLODDistance + (tick % (primaryRenderLODDistance * 2));
+			for (int z = (int) (playerSmartPos.Z / LOD.LOD_SIZE - primaryRenderLODDistance); z < (int) (playerSmartPos.Z / LOD.LOD_SIZE + primaryRenderLODDistance); z++)
 			{
 				Vector3 pos = new Vector3(x, 0, z);
 
-				if (new Vector2(pos.X * LOD.LOD_SIZE, pos.Z * LOD.LOD_SIZE).DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) >= Math.Pow(primaryRenderLODDistance * LOD.LOD_SIZE, 2))
+				if (new Vector2(pos.X * LOD.LOD_SIZE, pos.Z * LOD.LOD_SIZE).DistanceSquaredTo(playerSmartPosXZ) >= Math.Pow(primaryRenderLODDistance * LOD.LOD_SIZE, 2))
 					continue;
 
 				int hash = Util.LODPosToChunkName(pos);
@@ -173,7 +180,7 @@ public partial class World : Node3D
 				int hash = hashes[(i + 256 * tick) % hashes.Length];
 
 				LOD l = LODMap[hash];
-				if (new Vector2(l.GlobalPosition.X, l.GlobalPosition.Z).DistanceSquaredTo(new Vector2(player.GlobalPosition.X, player.GlobalPosition.Z)) > Math.Pow((1 + primaryRenderLODDistance) * LOD.LOD_SIZE, 2))
+				if (new Vector2(l.GlobalPosition.X, l.GlobalPosition.Z).DistanceSquaredTo(playerSmartPosXZ) > Math.Pow((1 + primaryRenderLODDistance) * LOD.LOD_SIZE, 2))
 				{
 					l.QueueFree();
 					LODMap.Remove(l.hash);
@@ -205,7 +212,7 @@ public partial class World : Node3D
 		if (y > 255)
 			return fallback;
 
-		int hash = Util.WorldPosToChunkName(new Vector3(x, y, z));
+		int hash = Util.AbsPosToChunkName(new Vector3(x, y, z));
 
 		if (!chunkMap.ContainsKey(hash))
 			return fallback;
@@ -239,7 +246,7 @@ public partial class World : Node3D
 		if (y > 255 || y < -128)
 			return null;
 
-		int hash = Util.WorldPosToChunkName(new Vector3(x, y, z));
+		int hash = Util.AbsPosToChunkName(new Vector3(x, y, z));
 
 		if (!chunkMap.ContainsKey(hash))
 			return null;
@@ -302,7 +309,7 @@ public partial class World : Node3D
 
 	public Chunk WorldPosToChunk(Vector3 v)
 	{
-		int hash = Util.WorldPosToChunkName(v);
+		int hash = Util.AbsPosToChunkName(v);
 
 		if (chunkMap.ContainsKey(hash))
 		{
@@ -320,7 +327,7 @@ public partial class World : Node3D
 		chunkManager.AddChild(c);
 		chunkMap.Add(hash, c);
 
-		c.GlobalPosition = chunkPos * CHUNK_SCALAR;
+		c.GlobalPosition = Util.AbsPosToSmartPos(chunkPos * CHUNK_SCALAR);
 		c.Init(this);
 
 		return c;
