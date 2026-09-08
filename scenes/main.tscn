@@ -36,13 +36,11 @@ seamless = true
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tefeu"]
 shader = ExtResource("2_tbgi4")
-shader_parameter/sky_zenith_color = Color(0.38085288, 0.4515808, 0.54746765, 1)
-shader_parameter/sky_horizon_color = Color(0.6582329, 0.6525306, 0.66202146, 1)
-shader_parameter/sky_nadir_color = Color(0.43766463, 0.47375104, 0.5803632, 1)
 shader_parameter/star_noise = SubResource("NoiseTexture2D_choun")
 
 [sub_resource type="Sky" id="Sky_h2yge"]
 sky_material = SubResource("ShaderMaterial_tefeu")
+process_mode = 3
 
 [sub_resource type="Environment" id="Environment_1bvp3"]
 background_mode = 2
@@ -58,17 +56,20 @@ adjustment_enabled = true
 adjustment_saturation = 0.9
 
 [sub_resource type="Gradient" id="Gradient_jyhfs"]
-colors = PackedColorArray(0.38431373, 0.45490196, 0.54901963, 1, 0.27, 0.34800002, 0.45, 1)
+colors = PackedColorArray(0.22000001, 0.298, 0.4, 1, 0.15, 0.21500002, 0.3, 1)
 
 [sub_resource type="Gradient" id="Gradient_tbgi4"]
-colors = PackedColorArray(0.64705884, 0.654902, 0.67058825, 1, 0.54, 0.56, 0.6, 1)
+colors = PackedColorArray(0.42000002, 0.48000005, 0.6, 1, 0.425, 0.45000002, 0.5, 1)
 
 [sub_resource type="Gradient" id="Gradient_tefeu"]
-colors = PackedColorArray(0.42352942, 0.47843137, 0.5882353, 1, 0.56, 0.6066667, 0.7, 1)
+colors = PackedColorArray(0.36, 0.4066667, 0.5, 1, 0.48000002, 0.52000004, 0.6, 1)
 
 [sub_resource type="Gradient" id="Gradient_o6xl0"]
 offsets = PackedFloat32Array(0, 0.056962024)
 colors = PackedColorArray(1, 1, 1, 1, 0.07806667, 0.053, 0.1, 1)
+
+[sub_resource type="Gradient" id="Gradient_choun"]
+colors = PackedColorArray(0, 0.039215688, 0.078431375, 1, 0.003921569, 0.003921569, 0.003921569, 1)
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_tipki"]
 
@@ -109,6 +110,7 @@ zenithDuskColor = Color(0.275, 0.35000002, 0.5, 1)
 horizonDuskColor = Color(1, 0.58, 0.39999998, 1)
 nadirDuskColor = Color(0.87, 0.3306, 0.33958986, 1)
 nightGradient = SubResource("Gradient_o6xl0")
+nearFadeGradient = SubResource("Gradient_choun")
 
 [node name="Sun" type="DirectionalLight3D" parent="World/WorldEnvironment" unique_id=1249947181]
 transform = Transform3D(2.4044422e-08, -0.83511674, -0.5500727, -3.650409e-08, -0.5500727, 0.83511674, -1, 9.380479e-15, -4.371136e-08, 0, 0, 0)

@@ -1,6 +1,9 @@
 shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx, skip_vertex_transform;
 
+global uniform vec4 near_fade_color;
+global uniform vec3 sun_dir;
+
 uniform sampler2D texture_albedo : source_color, filter_nearest, repeat_enable;
 uniform sampler2D smoothness_map : source_color, filter_nearest, repeat_enable;
 uniform sampler2D world_elevation_map;
@@ -17,12 +20,16 @@ const mat4 dither_matrix = mat4(
 varying float dist;
 varying vec2 uv;
 varying float vertex_id_interp;
+varying vec2 angle;
 
+#include "sample_sky_color.gdshaderinc"
 
 void vertex() {
 	//VERTEX.y += random(vec2(float(VERTEX_ID) + VERTEX.x, VERTEX.z)) * 0.0001f;
 
 	//VERTEX = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	angle = normalize(vec2(VERTEX.x, VERTEX.z));
+	
 	VERTEX = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 
 	VERTEX -= floor(CAMERA_POSITION_WORLD);
@@ -78,8 +85,11 @@ void fragment() {
 
 	DEPTH = FRAGCOORD.z;
 
-	FOG = vec4(0.3, 0.5, 0.7, min(0.9, pow(depth_normalized * 2.0, 1.5)));
-
+	//FOG = vec4(0.3, 0.5, 0.7, min(0.9, pow(depth_normalized * 2.0, 1.5)));
+	FOG = vec4(
+		sample_sky_color(normalize(vec3(VERTEX.x, 0.0, VERTEX.z)), sun_dir),
+		min(0.9, pow(depth_normalized * 2.0, 1.5)));
+	FOG.rgb += near_fade_color.rgb;
 
 	// Default material shader
 	vec4 albedo_tex = texture(texture_albedo, uv);
@@ -93,10 +103,7 @@ void fragment() {
 	SPECULAR = smoothness;
 	METALLIC = smoothness;
 
-	if (lod) {
-		ALPHA = 1.0;
-	}
-
+	ALPHA = lod ? 1.0 : ALPHA;
 
 	// Pixelate shadows; credit: https://forum.godotengine.org/t/shader-for-pixelated-shadows-3d/115691/7
 	vec2 tex_size = vec2(textureSize(texture_albedo, 0));

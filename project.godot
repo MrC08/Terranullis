@@ -90,3 +90,26 @@ lights_and_shadows/positional_shadow/soft_shadow_filter_quality.mobile=2
 anti_aliasing/screen_space_roughness_limiter/enabled=false
 lights_and_shadows/positional_shadow/atlas_size=8192
 lights_and_shadows/positional_shadow/atlas_size.mobile=4096
+
+[shader_globals]
+
+sky_zenith_color={
+"type": "color",
+"value": Color(0, 0, 0, 1)
+}
+sky_horizon_color={
+"type": "color",
+"value": Color(0, 0, 0, 1)
+}
+sky_nadir_color={
+"type": "color",
+"value": Color(0, 0, 0, 1)
+}
+near_fade_color={
+"type": "color",
+"value": Color(0.05, 0.05, 0.05, 1)
+}
+sun_dir={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}

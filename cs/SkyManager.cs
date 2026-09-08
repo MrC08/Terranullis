@@ -16,6 +16,7 @@ public partial class SkyManager : WorldEnvironment
 	[Export] Color nadirDuskColor;
 
 	[Export] Gradient nightGradient;
+	[Export] Gradient nearFadeGradient;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -45,7 +46,7 @@ public partial class SkyManager : WorldEnvironment
 		Color horizon = horizonColorGradient.Sample(playerPos.Y / 256);
 		Color nadir = nadirColorGradient.Sample(playerPos.Y / 256);
 
-		float solarAltitude = MathF.Abs(sun.RotationDegrees.X) > 90 ? (Math.Sign(sun.RotationDegrees.X) * 180) - sun.RotationDegrees.X : sun.RotationDegrees.X;
+		float solarAltitude = sun.GlobalTransform.Basis.Z.Y * -90f; // In degrees
 		float sunsetFactor = (float) Math.Pow(1 - Math.Abs(Math.Min(solarAltitude + 2.5, 89)) / 90, 3.0) / 2f;
 
 		sun.LightEnergy = Math.Clamp(-solarAltitude * 0.125f, 0, 1);
@@ -71,8 +72,10 @@ public partial class SkyManager : WorldEnvironment
 			nadir = nadir.Darkened((playerPos.Y - 512f) / 2400f);
 		}
 
-		((ShaderMaterial) Environment.Sky.SkyMaterial).SetShaderParameter("sky_zenith_color", zenith);
-		((ShaderMaterial) Environment.Sky.SkyMaterial).SetShaderParameter("sky_horizon_color", horizon);
-		((ShaderMaterial) Environment.Sky.SkyMaterial).SetShaderParameter("sky_nadir_color", nadir);
+		RenderingServer.GlobalShaderParameterSet("sky_zenith_color", zenith);
+		RenderingServer.GlobalShaderParameterSet("sky_horizon_color", horizon);
+		RenderingServer.GlobalShaderParameterSet("sky_nadir_color", nadir);
+		RenderingServer.GlobalShaderParameterSet("sun_dir", sun.GlobalTransform.Basis.Z.Normalized());
+		RenderingServer.GlobalShaderParameterSet("near_fade_color", nearFadeGradient.Sample(Math.Min(1f, Math.Max(0f, (solarAltitude + 10f) / 80f))));
 	}
 }
