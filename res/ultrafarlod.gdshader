@@ -23,7 +23,7 @@ void vertex() {
 	
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xz + offset;
 	// It should really be `256.0 * texture...` but it's corrected for the fact that the UFLOD should never look higher than mountains
-	VERTEX.y = too_close ? -1024.0 : 240.0 * texture(heightmap, world_pos / vec2(180000, 90000) + vec2(0.5)).r;
+	VERTEX.y = too_close ? -1024.0 : 230.0 * texture(heightmap, world_pos / vec2(180000, 90000) + vec2(0.5)).r;
 	
 	destroy = too_close ? 1.0 : 0.0;
 

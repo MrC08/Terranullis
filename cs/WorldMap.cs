@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 public partial class WorldMap : TextureRect
 {
@@ -45,6 +44,15 @@ public partial class WorldMap : TextureRect
 			if (Visible && mouseEvent.Pressed)
 			{
 				Vector3 pos = new Vector3(GetLocalMousePosition().X, 530, GetLocalMousePosition().Y) / 2;
+
+				/*GD.Print(
+					pos.Z - 90, "° lat, ", pos.X - 180, "° lon ",
+					" Tem:", Generator.TemperatureMap[(int)pos.X][(int)pos.Z],
+					" Hmd:", Generator.HumidityMap[(int)pos.X][(int)pos.Z],
+					" Ele:", Generator.ElevationMap[(int)pos.X][(int)pos.Z],
+					" Bio:", Generator.BiomeMap[(int)pos.X][(int)pos.Z]
+				);*/
+
 				pos.X -= 180;
 				pos.Z -= 90;
 

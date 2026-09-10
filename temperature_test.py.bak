@@ -1,0 +1,82 @@
+import math
+import sys
+from matplotlib import pyplot as plt
+
+
+DECL_MAX = 23.4 / 90  # axial tilt, normalized to the same -1..1 scale as l
+
+
+def declination(s):
+	# Subsolar latitude: -0.26 (23.4S) around Dec/Jan, +0.26 (23.4N) around Jun.
+	return -DECL_MAX * math.cos(2 * math.pi * s)
+
+
+def insolation(l, s):
+	# Peaks at 1 when l equals the current subsolar latitude, falls off as a
+	# cosine of the angular distance from it.
+	return math.cos((l - declination(s)) * math.pi / 2)
+
+
+def temperature(l, h, t, s):
+	l = float(l)
+	h = float(h)
+	t = float(t)
+	s = float(s)
+
+	base = -45.17 + 110.7 * t - 51.07 * t * t
+	return 92.54 * insolation(l, s) + base
+
+
+def d(l, h, t, s):
+	l = float(l)
+	h = float(h)
+	t = float(t)
+	s = float(s)
+	return temperature(l, h, t, s) + 4 + 14 * (1 - h)
+
+
+def n(l, h, t, s):
+	l = float(l)
+	h = float(h)
+	t = float(t)
+	s = float(s)
+	return temperature(l, h, t, s) - 4 - 14 * (1 - h)
+
+
+fig, ax = plt.subplots(3, 4)
+
+for i, e in enumerate([
+	{"l": 0 / 90, "h": 0.7176822, "t": 0.7927057, "b": "Forest"},
+	{"l": -89 / 90, "h": 0.71632206, "t": 0.03011797, "b": "Sea Ice"},
+	{"l": 6 / 90, "h": 0.8663108, "t": 0.83326423, "b": "Coral Reef"},
+	{"l": -13 / 90, "h": 0.52560794, "t": 0.7123566, "b": "Prarie"},
+	{"l": -85 / 90, "h": 0.65239465, "t": 0.0, "b": "Ice Sheet"},
+	{"l": 24 / 90, "h": 0.05834421, "t": 0.5900915, "b": "Desert"},
+	{"l": -2.5 / 90, "h": 0.18463406, "t": 0.83200866, "b": "Extreme Desert"},
+	{"l": 62 / 90, "h": 0.14183111, "t": 0.28164214, "b": "Tundra"},
+	{"l": 53.5 / 90, "h": 0.32098752, "t": 0.23400114, "b": "Boreal Forest"},
+	{"l": -11 / 90, "h": 0.36483622, "t": 0.70615935, "b": "Shrublands"},
+	{"l": -25.5 / 90, "h": 0.8150707, "t": 0.31286427, "b": "Magellanic Rainforest"},
+	{"l": -62.5 / 90, "h": 0.7401704, "t": 0.23572908, "b": "Boglands"},
+]):
+	if sys.argv[-1] == "graph":
+		ax[i % 3, i // 3].set_title(str(e["b"]) + f" Lat={int(e['l'] * 90)}°")
+		ax[i % 3, i // 3].plot([float(s)/12.0 for s in range(13)], [d(e["l"], e["h"], e["t"], s/12.0) for s in range(13)])  # Plot some data on the Axes.
+		ax[i % 3, i // 3].plot([float(s)/12.0 for s in range(13)], [n(e["l"], e["h"], e["t"], s/12.0) for s in range(13)])  # Plot some data on the Axes.
+		
+		minimum = min(40, min([d(e["l"], e["h"], e["t"], s/12.0) for s in range(13)]))
+		maximum = max([d(e["l"], e["h"], e["t"], s/12.0) for s in range(13)])
+
+		for gridline in range(int(minimum / 10) * 10 - 10, int(maximum / 10) * 10 + 11, 10):
+			ax[i % 3, i // 3].axhline(y=gridline, color="gray", linewidth=0.5, linestyle="--", zorder=0)
+		ax[i % 3, i // 3].axhline(y=32, color="blue", linewidth=0.8, linestyle="--", zorder=0)
+	else:
+		print("\n")
+		print(str(e["b"]) + f" Lat={int(e['l'] * 90)}°")
+		print("Daytime (season, temperature):", [f"({a[0]:.2f} {a[1]:.2f})" for a in zip([float(s)/12.0 for s in range(13)], [d(e["l"], e["h"], e["t"], s/12.0) for s in range(13)])])
+		print("Nighttime (season, temperature):", [f"({a[0]:.2f} {a[1]:.2f})" for a in zip([float(s)/12.0 for s in range(13)], [n(e["l"], e["h"], e["t"], s/12.0) for s in range(13)])])
+
+fig.tight_layout()
+
+if sys.argv[-1] == "graph":
+	plt.show()

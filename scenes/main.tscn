@@ -69,7 +69,7 @@ offsets = PackedFloat32Array(0, 0.056962024)
 colors = PackedColorArray(1, 1, 1, 1, 0.07806667, 0.053, 0.1, 1)
 
 [sub_resource type="Gradient" id="Gradient_choun"]
-colors = PackedColorArray(0, 0.039215688, 0.078431375, 1, 0.003921569, 0.003921569, 0.003921569, 1)
+colors = PackedColorArray(0.039215688, 0.078431375, 0.11764706, 1, 0.003921569, 0.003921569, 0.003921569, 1)
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_tipki"]
 

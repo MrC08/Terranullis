@@ -35,6 +35,7 @@ public partial class SkyManager : WorldEnvironment
 			playerPos = Util.SmartPosToAbsPos(player.GlobalPosition);
 
 			sun.RotateZ((float) delta * 0.004363323f);
+			//sun.RotateZ((float) delta * 0.3f);
 			sun.Transform = sun.Transform.Orthonormalized();
 
 			sun.GlobalPosition = playerPos;
@@ -76,6 +77,6 @@ public partial class SkyManager : WorldEnvironment
 		RenderingServer.GlobalShaderParameterSet("sky_horizon_color", horizon);
 		RenderingServer.GlobalShaderParameterSet("sky_nadir_color", nadir);
 		RenderingServer.GlobalShaderParameterSet("sun_dir", sun.GlobalTransform.Basis.Z.Normalized());
-		RenderingServer.GlobalShaderParameterSet("near_fade_color", nearFadeGradient.Sample(Math.Min(1f, Math.Max(0f, (solarAltitude + 10f) / 80f))));
+		RenderingServer.GlobalShaderParameterSet("near_fade_color", nearFadeGradient.Sample(Math.Min(1f, Math.Max(0f, (solarAltitude + 15f) / 60f))));
 	}
 }
