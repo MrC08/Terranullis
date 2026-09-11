@@ -433,4 +433,59 @@ public partial class World : Node3D
 
 		return delta;
 	}
+
+	public Vector3 DoRaycastSmartPos(Vector3 position, Vector3 direction, float range) {
+		Vector3 hit = DoRaycastAbsPos(Util.SmartPosToAbsPos(position), direction, range);
+		return hit == Vector3.Zero ? Vector3.Zero : Util.AbsPosToSmartPos(hit);
+	}
+
+	// Voxel DDA (Amanatides-Woo) raycast: steps cell-by-cell along `direction` from
+	// `position`, returning the exact world-space surface point of the first
+	// collidable block within `range`, or Vector3.Zero if nothing is hit.
+	public Vector3 DoRaycastAbsPos(Vector3 position, Vector3 direction, float range) {
+		direction = direction.Normalized();
+
+		Vector3I blockPos = new Vector3I(Mathf.FloorToInt(position.X), Mathf.FloorToInt(position.Y), Mathf.FloorToInt(position.Z));
+
+		Vector3I step = new Vector3I(
+			direction.X > 0f ? 1 : (direction.X < 0f ? -1 : 0),
+			direction.Y > 0f ? 1 : (direction.Y < 0f ? -1 : 0),
+			direction.Z > 0f ? 1 : (direction.Z < 0f ? -1 : 0)
+		);
+
+		Vector3 tDelta = new Vector3(
+			direction.X != 0f ? Mathf.Abs(1f / direction.X) : float.PositiveInfinity,
+			direction.Y != 0f ? Mathf.Abs(1f / direction.Y) : float.PositiveInfinity,
+			direction.Z != 0f ? Mathf.Abs(1f / direction.Z) : float.PositiveInfinity
+		);
+
+		Vector3 tMax = new Vector3(
+			direction.X > 0f ? (blockPos.X + 1 - position.X) * tDelta.X : (direction.X < 0f ? (position.X - blockPos.X) * tDelta.X : float.PositiveInfinity),
+			direction.Y > 0f ? (blockPos.Y + 1 - position.Y) * tDelta.Y : (direction.Y < 0f ? (position.Y - blockPos.Y) * tDelta.Y : float.PositiveInfinity),
+			direction.Z > 0f ? (blockPos.Z + 1 - position.Z) * tDelta.Z : (direction.Z < 0f ? (position.Z - blockPos.Z) * tDelta.Z : float.PositiveInfinity)
+		);
+
+		float t = 0f;
+
+		while (t <= range) {
+			if (CheckForCollisionAtPoint(blockPos.X, blockPos.Y, blockPos.Z))
+				return position + direction * t;
+
+			if (tMax.X < tMax.Y && tMax.X < tMax.Z) {
+				blockPos.X += step.X;
+				t = tMax.X;
+				tMax.X += tDelta.X;
+			} else if (tMax.Y < tMax.Z) {
+				blockPos.Y += step.Y;
+				t = tMax.Y;
+				tMax.Y += tDelta.Y;
+			} else {
+				blockPos.Z += step.Z;
+				t = tMax.Z;
+				tMax.Z += tDelta.Z;
+			}
+		}
+
+		return Vector3.Zero;
+	}
 }
