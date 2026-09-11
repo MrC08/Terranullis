@@ -11,7 +11,3 @@ script = ExtResource("1_jas4a")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1696090099]
 material_override = ExtResource("2_jtw3q")
 mesh = SubResource("ArrayMesh_kdh3y")
-
-[node name="RigidBody3D" type="StaticBody3D" parent="." unique_id=1718803463]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D" unique_id=325194846]

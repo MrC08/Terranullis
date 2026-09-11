@@ -6,6 +6,7 @@ public struct BlockType
 
 	public bool IsTransparent;
 	public bool IsInvisible;
+	public bool IsCollidable;
 
 	public ushort TextureTop;
 	public ushort TextureBottom;
@@ -22,6 +23,7 @@ public struct BlockType
 
 		IsTransparent = false;
 		IsInvisible = false;
+		IsCollidable = true;
 		SetAllTextures(0);
 	}
 
@@ -36,6 +38,12 @@ public struct BlockType
 		this.IsInvisible = IsInvisible;
 		if (IsInvisible)
 			this.IsTransparent = true;
+		return this;
+	}
+
+	public BlockType SetCollidable(bool IsCollidable)
+	{
+		this.IsCollidable = IsCollidable;
 		return this;
 	}
 

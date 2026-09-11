@@ -1,20 +1,31 @@
 using System;
 using Godot;
 
-public partial class Player : CharacterBody3D
+public partial class Player : Node3D
 {
-	const float ACCELERATION = 80f;
-	const float SPEED = 6f;
+	const float ACCELERATION = 60f;
+	const float RUN_SPEED = 5.8f;
+	const float WALK_SPEED = 3f;
 	const float JUMP_VELOCITY = 7f;
 	const float TERMINAL_VELOCITY = 50f;
+
+	// Matches the capsule this replaced: radius 0.4, height 1.9, centered 1.0 above the player origin.
+	const float HALF_WIDTH = 0.4f;
+	const float FEET_OFFSET = 0.05f;
+	const float HEIGHT = 1.9f;
 
 	Camera3D camera;
 	RayCast3D raycast;
 	World world;
 	MeshInstance3D ultraFarLOD;
 
+	public Vector3 Velocity;
+	bool onFloor = false;
+	Vector3 gravity;
+	float lastJumpPressedTime = float.NegativeInfinity;
+
 	bool flying = false;
-	float flightSpeed = SPEED;
+	float flightSpeed = RUN_SPEED;
 
 
 	public override void _Ready()
@@ -27,35 +38,48 @@ public partial class Player : CharacterBody3D
 		camera.MakeCurrent();
 
 		((ShaderMaterial) ultraFarLOD.MaterialOverride).SetShaderParameter("heightmap", Generator.ShaderReadyElevationMap);
+
+		Vector3 gravityDir = (Vector3) ProjectSettings.GetSetting("physics/3d/default_gravity_vector", Vector3.Down);
+		float gravityMag = (float) ProjectSettings.GetSetting("physics/3d/default_gravity", 9.8f);
+		gravity = gravityDir * gravityMag;
 	}
 
 
-	public override void _PhysicsProcess(double delta)
+	public override void _Process(double delta)
 	{
-		float deltaf = (float) Math.Clamp(delta, 0, 1);
+		float deltaf = (float)Math.Clamp(delta, 0, 1);
 
 		Vector3 acceleration = Vector3.Zero;
+
+		if (Input.IsActionJustPressed("jump")) {
+			lastJumpPressedTime = Time.GetTicksMsec();
+		}
 
 		if (flying)
 		{
 			if (Input.IsActionPressed("crouch"))
 			{
-				acceleration = acceleration with {Y = -flightSpeed};
-			} else if (Input.IsActionPressed("jump"))
-			{
-				acceleration = acceleration with {Y = flightSpeed};
-			} else
-			{
-				acceleration = acceleration with {Y = 0f};
+				acceleration = acceleration with { Y = -flightSpeed };
 			}
-		} else
+			else if (Input.IsActionPressed("jump"))
+			{
+				acceleration = acceleration with { Y = flightSpeed };
+			}
+			else
+			{
+				acceleration = acceleration with { Y = 0f };
+			}
+		}
+		else
 		{
-			if (!IsOnFloor())
+			if (!onFloor)
 			{
-				acceleration = GetGravity() * deltaf;
-			} else if (Input.IsActionJustPressed("jump"))
+				acceleration = gravity * deltaf;
+			}
+			else if (Time.GetTicksMsec() - lastJumpPressedTime < 100f)
 			{
-				acceleration = acceleration with {Y = JUMP_VELOCITY};
+				acceleration = acceleration with { Y = JUMP_VELOCITY };
+				lastJumpPressedTime = float.NegativeInfinity;
 			}
 		}
 
@@ -65,31 +89,44 @@ public partial class Player : CharacterBody3D
 		if (!direction.IsZeroApprox())
 		{
 			if (!flying)
-				acceleration = (direction * ACCELERATION * deltaf) with {Y = acceleration.Y};
+			{
+				if ((Velocity with { Y = 0f }).Length() < WALK_SPEED)
+				{
+					acceleration = (direction * ACCELERATION * deltaf) with { Y = acceleration.Y };
+				}
+			}
 			else
-				acceleration = (direction * flightSpeed) with {Y = acceleration.Y};
+			{
+				acceleration = (direction * flightSpeed) with { Y = acceleration.Y };
+			}
 		}
-		
-		if (!flying) {
-			acceleration += (-Velocity * 0.2f) with {Y = 0};
 
+		if (!flying)
+		{
 			Velocity += acceleration;
 
-			if ((Velocity with {Y = 0f}).Length() > (flying ? flightSpeed : SPEED)) {
-				float yVel = Velocity.Y;
-				Velocity = ((Velocity with {Y = 0f}).Normalized() * (flying ? flightSpeed : SPEED)) with {Y = yVel};
-			}
 			if (Velocity.Y < -TERMINAL_VELOCITY)
-				Velocity = Velocity with {Y = -TERMINAL_VELOCITY};
-		} else
+				Velocity = Velocity with { Y = -TERMINAL_VELOCITY };
+		}
+		else
 		{
 			Velocity = acceleration;
 		}
 
+		Velocity -= (Velocity with { Y = 0f}) * deltaf * 5f;
+
 		if (Velocity.IsZeroApprox())
 			Velocity = Vector3.Zero;
 
-		MoveAndSlide();
+		Vector3 entityMin = Position + new Vector3(-HALF_WIDTH, FEET_OFFSET, -HALF_WIDTH);
+		Vector3 entityMax = Position + new Vector3(HALF_WIDTH, FEET_OFFSET + HEIGHT, HALF_WIDTH);
+
+		CollisionResult result = world.CheckWorldSmartPosAABB(entityMin, entityMax, Velocity, deltaf);
+
+		Position = Util.AbsPosToSmartPos(result.AbsPosition) + new Vector3(HALF_WIDTH, -FEET_OFFSET, HALF_WIDTH);
+		Velocity = result.Velocity;
+		onFloor = result.OnFloor;
+
 		UpdateRaycast(false);
 
 		ultraFarLOD.GlobalPosition = ((GlobalPosition / 32f).Floor() * 32f) with {Y = 0f};

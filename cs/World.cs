@@ -11,7 +11,7 @@ public partial class World : Node3D
 	readonly PackedScene LODScene = (PackedScene) ResourceLoader.Load("res://scenes/lod.tscn");
 	public Node3D chunkManager;
 	public Node3D LODManager;
-	public CharacterBody3D player;
+	public Node3D player;
 	ChunkCompiler chunkCompiler;
 	[Export] Noise[] noiseArray;
 
@@ -31,7 +31,7 @@ public partial class World : Node3D
 	{
 		chunkManager = (Node3D) GetNode("ChunkManager");
 		LODManager = (Node3D) GetNode("LODManager");
-		player = (CharacterBody3D) GetNode("Player");
+		player = (Node3D) GetNode("Player");
 
 		chunkCompiler = new ChunkCompiler();
 
@@ -241,7 +241,7 @@ public partial class World : Node3D
 		return chunk.GetBlock(x, y, z);
 	}
 
-	public Chunk tryToGetChunkFromBlockCoords(int x, int y, int z)
+	public Chunk TryToGetChunkFromBlockCoords(int x, int y, int z)
 	{
 		if (y > 255 || y < -128)
 			return null;
@@ -259,7 +259,7 @@ public partial class World : Node3D
 		return chunk;
 	}
 
-	public void markChunkAsCompilationNeeded(Chunk chunk)
+	public void MarkChunkAsCompilationNeeded(Chunk chunk)
 	{
 		if (chunk != null)
 			chunk.needsCompilation = true;
@@ -267,7 +267,7 @@ public partial class World : Node3D
 
 	public bool SetBlock(int gx, int gy, int gz, ulong block)
 	{
-		Chunk chunk = tryToGetChunkFromBlockCoords(gx, gy, gz);
+		Chunk chunk = TryToGetChunkFromBlockCoords(gx, gy, gz);
 		if (chunk == null)
 			return false;
 
@@ -286,17 +286,17 @@ public partial class World : Node3D
 		chunk.needsCompilation = true;
 
 		if (x == 0)
-			markChunkAsCompilationNeeded(tryToGetChunkFromBlockCoords(gx - 1, gy, gz));
+			MarkChunkAsCompilationNeeded(TryToGetChunkFromBlockCoords(gx - 1, gy, gz));
 		if (x == Chunk.CHUNK_SIZE - 1)
-			markChunkAsCompilationNeeded(tryToGetChunkFromBlockCoords(gx + 1, gy, gz));
+			MarkChunkAsCompilationNeeded(TryToGetChunkFromBlockCoords(gx + 1, gy, gz));
 		if (y == 0)
-			markChunkAsCompilationNeeded(tryToGetChunkFromBlockCoords(gx, gy - 1, gz));
+			MarkChunkAsCompilationNeeded(TryToGetChunkFromBlockCoords(gx, gy - 1, gz));
 		if (y == Chunk.CHUNK_VSIZE - 1)
-			markChunkAsCompilationNeeded(tryToGetChunkFromBlockCoords(gx, gy + 1, gz));
+			MarkChunkAsCompilationNeeded(TryToGetChunkFromBlockCoords(gx, gy + 1, gz));
 		if (z == 0)
-			markChunkAsCompilationNeeded(tryToGetChunkFromBlockCoords(gx, gy, gz - 1));
+			MarkChunkAsCompilationNeeded(TryToGetChunkFromBlockCoords(gx, gy, gz - 1));
 		if (z == Chunk.CHUNK_SIZE - 1)
-			markChunkAsCompilationNeeded(tryToGetChunkFromBlockCoords(gx, gy, gz + 1));
+			MarkChunkAsCompilationNeeded(TryToGetChunkFromBlockCoords(gx, gy, gz + 1));
 
 
 		return true;
@@ -331,5 +331,106 @@ public partial class World : Node3D
 		c.Init(this);
 
 		return c;
+	}
+
+
+	public bool CheckForCollisionAtPoint(Vector3 pos) {
+		return CheckForCollisionAtPoint((int)pos.X, (int)pos.Y, (int)pos.Z);
+	}
+
+	public bool CheckForCollisionAtPoint(int x, int y, int z) {
+		ulong block = GetBlock(x, y, z, 0);
+		return BlockTable.Get(block).IsCollidable;
+	}
+
+	const float COLLISION_EPSILON = 0.001f;
+
+	public CollisionResult CheckWorldSmartPosAABB(Vector3 entityMin, Vector3 entityMax, Vector3 velocity, float delta) {
+		return CheckWorldAbsPosAABB(
+			Util.SmartPosToAbsPos(entityMin),
+			Util.SmartPosToAbsPos(entityMax),
+			velocity,
+			delta
+		);
+	}
+
+	public CollisionResult CheckWorldAbsPosAABB(Vector3 entityMin, Vector3 entityMax, Vector3 velocity, float delta) {
+		Vector3 move = velocity * delta;
+
+		move.Y = ResolveAxisMovement(entityMin, entityMax, 1, move.Y);
+		entityMin.Y += move.Y;
+		entityMax.Y += move.Y;
+
+		move.X = ResolveAxisMovement(entityMin, entityMax, 0, move.X);
+		entityMin.X += move.X;
+		entityMax.X += move.X;
+
+		move.Z = ResolveAxisMovement(entityMin, entityMax, 2, move.Z);
+		entityMin.Z += move.Z;
+		entityMax.Z += move.Z;
+
+		// A tiny persistent downward probe keeps OnFloor true while resting with
+		// zero vertical velocity, not just while actively falling into the ground.
+		bool onFloor = velocity.Y <= 0f && (move.Y > velocity.Y * delta
+			|| ResolveAxisMovement(entityMin, entityMax, 1, -COLLISION_EPSILON) > -COLLISION_EPSILON);
+
+		Vector3 resultVelocity = velocity;
+		if (move.X != velocity.X * delta) resultVelocity.X = 0f;
+		if (move.Y != velocity.Y * delta) resultVelocity.Y = 0f;
+		if (move.Z != velocity.Z * delta) resultVelocity.Z = 0f;
+
+		return new CollisionResult {
+			AbsPosition = entityMin,
+			Velocity = resultVelocity,
+			OnFloor = onFloor
+		};
+	}
+
+	// Clamps `delta` (a displacement along `axis`, where 0=X, 1=Y, 2=Z) to the
+	// nearest solid block the [min, max] AABB would otherwise sweep into,
+	// checking only blocks the box already overlaps on the other two axes.
+	private float ResolveAxisMovement(Vector3 min, Vector3 max, int axis, float delta) {
+		if (delta == 0f)
+			return 0f;
+
+		int a1 = (axis + 1) % 3;
+		int a2 = (axis + 2) % 3;
+
+		int min1 = Mathf.FloorToInt(min[a1]);
+		int max1 = Mathf.CeilToInt(max[a1]) - 1;
+		int min2 = Mathf.FloorToInt(min[a2]);
+		int max2 = Mathf.CeilToInt(max[a2]) - 1;
+
+		float leadingFace = delta > 0f ? max[axis] : min[axis];
+		float targetFace = leadingFace + delta;
+
+		int cellFrom = Mathf.FloorToInt(delta > 0f ? leadingFace : targetFace);
+		int cellTo = Mathf.FloorToInt(delta > 0f ? targetFace : leadingFace);
+
+		for (int c = cellFrom; c <= cellTo; c++) {
+			for (int c1 = min1; c1 <= max1; c1++) {
+				for (int c2 = min2; c2 <= max2; c2++) {
+					int bx, by, bz;
+					switch (axis) {
+						case 0: bx = c; by = c1; bz = c2; break;
+						case 1: bx = c2; by = c; bz = c1; break;
+						default: bx = c1; by = c2; bz = c; break;
+					}
+
+					if (!CheckForCollisionAtPoint(bx, by, bz))
+						continue;
+
+					float blockFace = delta > 0f ? c : c + 1f;
+					float allowed = blockFace - leadingFace;
+
+					if (delta > 0f)
+						delta = Mathf.Min(delta, Mathf.Max(0f, allowed - COLLISION_EPSILON));
+					else
+						delta = Mathf.Max(delta, Mathf.Min(0f, allowed + COLLISION_EPSILON));
+				}
+			}
+		}
+
+		return delta;
 	}
 }

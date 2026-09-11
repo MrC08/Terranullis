@@ -11,10 +11,9 @@ public partial class Chunk : Node3D, ICompilable
 	public const float TEX_SIZE = 16f;
 
 	public static ulong AmountCompiled;
-	public static double AverageTime;
+	public static double AverageTime = 5;
 
 	MeshInstance3D meshInstance;
-	CollisionShape3D collisionShape;
 	World world;
 
 	public BlockData blockData;
@@ -29,7 +28,6 @@ public partial class Chunk : Node3D, ICompilable
 	public override void _Ready()
 	{
 		meshInstance = (MeshInstance3D) GetNode("MeshInstance3D");
-		collisionShape = (CollisionShape3D) GetNode("RigidBody3D/CollisionShape3D");
 
 		((ShaderMaterial) meshInstance.MaterialOverride).SetShaderParameter("world_elevation_map", Generator.ShaderReadyElevationMap);
 
@@ -174,7 +172,6 @@ public partial class Chunk : Node3D, ICompilable
 		double t = Time.GetTicksUsec();
 
 		meshInstance.Mesh = new ArrayMesh();
-		collisionShape.Shape = new ConcavePolygonShape3D();
 
 		var arrays = new Godot.Collections.Array();
 		arrays.Resize((int) Mesh.ArrayType.Max);
@@ -339,8 +336,6 @@ public partial class Chunk : Node3D, ICompilable
 			foreach (int i in indices.GetSpan()) {
 				rawFaces.Add(vertices.GetSpan()[i]);
 			}
-			
-			((ConcavePolygonShape3D) collisionShape.Shape).SetFaces(rawFaces.ToArray());
 		
 			ArrayMesh newMesh = new ArrayMesh();
 			newMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
@@ -355,9 +350,11 @@ public partial class Chunk : Node3D, ICompilable
 
 		lastCompiledTime = Time.GetTicksUsec();
 		AmountCompiled++;
-		AverageTime *= ((double) AmountCompiled - 1) / AmountCompiled;
-		AverageTime += (lastCompiledTime - t) * 0.001 / AmountCompiled;
-		
+		//AverageTime *= ((double) AmountCompiled - 1) / AmountCompiled;
+		//AverageTime += (lastCompiledTime - t) * 0.001 / AmountCompiled;
+
+		AverageTime = AverageTime * 0.999 + ((lastCompiledTime - t) * 0.001) * 0.001;
+
 		//GD.Print("Took msec: ", (end_t - t) * 0.001);
 		return (lastCompiledTime - t) * 0.001;
 	}

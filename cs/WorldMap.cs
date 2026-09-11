@@ -2,14 +2,14 @@ using Godot;
 
 public partial class WorldMap : TextureRect
 {
-	CharacterBody3D player;
+	Node3D player;
 	TextureRect marker;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		Visible = false;
-		player = (CharacterBody3D) GetNode("../../World/Player");
+		player = (Node3D) GetNode("../../World/Player");
 		marker = (TextureRect) GetNode("Marker");
 	}
 

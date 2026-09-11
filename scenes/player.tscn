@@ -43,7 +43,7 @@ size = Vector2(16384, 16384)
 subdivide_width = 64
 subdivide_depth = 64
 
-[node name="Player" type="CharacterBody3D" unique_id=14972779]
+[node name="Player" type="Node3D" unique_id=944796299]
 script = ExtResource("1_3vyb7")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=465437091]
@@ -69,6 +69,7 @@ mesh = SubResource("BoxMesh_3vyb7")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1323247333]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+current = true
 fov = 80.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Camera3D" unique_id=277335671]
