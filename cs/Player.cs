@@ -3,9 +3,9 @@ using Godot;
 
 public partial class Player : Node3D
 {
-	const float ACCELERATION = 60f;
-	const float RUN_SPEED = 5.8f;
-	const float WALK_SPEED = 3f;
+	const float ACCELERATION = 70f;
+	const float RUN_SPEED = 6.8f;
+	const float WALK_SPEED = 4f;
 	const float JUMP_VELOCITY = 7f;
 	const float TERMINAL_VELOCITY = 50f;
 
@@ -15,7 +15,6 @@ public partial class Player : Node3D
 	const float HEIGHT = 1.9f;
 
 	Camera3D camera;
-	RayCast3D raycast;
 	World world;
 	MeshInstance3D ultraFarLOD;
 
@@ -23,6 +22,7 @@ public partial class Player : Node3D
 	bool onFloor = false;
 	Vector3 gravity;
 	float lastJumpPressedTime = float.NegativeInfinity;
+	MeshInstance3D blockSelector;
 
 	bool flying = false;
 	float flightSpeed = RUN_SPEED;
@@ -31,10 +31,10 @@ public partial class Player : Node3D
 	public override void _Ready()
 	{
 		camera = (Camera3D) GetNode("Camera3D");
-		raycast = (RayCast3D) GetNode("RayCast3D");
 		world = (World) GetParent();
 		ultraFarLOD = (MeshInstance3D) GetNode("UltraFarLOD");
-		
+		blockSelector = (MeshInstance3D) GetNode("BlockSelector");
+
 		camera.MakeCurrent();
 
 		((ShaderMaterial) ultraFarLOD.MaterialOverride).SetShaderParameter("heightmap", Generator.ShaderReadyElevationMap);
@@ -48,6 +48,15 @@ public partial class Player : Node3D
 	public override void _Process(double delta)
 	{
 		float deltaf = (float)Math.Clamp(delta, 0, 1);
+
+		float raycast = world.DoRaycastSmartPos(GetEyePos(), GetEyeLookVector(), 4f);
+		if (raycast != -1) {
+			blockSelector.Visible = true;
+			blockSelector.GlobalPosition = (GetEyePos() + GetEyeLookVector() * (raycast + 0.01f)).Floor() + new Vector3(0.5f, 0.5f, 0.5f);
+			blockSelector.GlobalRotation = Vector3.Zero;
+		} else { 
+			blockSelector.Visible = false;
+		}
 
 		Vector3 acceleration = Vector3.Zero;
 
@@ -113,7 +122,7 @@ public partial class Player : Node3D
 			Velocity = acceleration;
 		}
 
-		Velocity -= (Velocity with { Y = 0f}) * deltaf * 5f;
+		Velocity -= (Velocity with { Y = 0f}) * deltaf * 10f;
 
 		if (Velocity.IsZeroApprox())
 			Velocity = Vector3.Zero;
@@ -127,25 +136,11 @@ public partial class Player : Node3D
 		Velocity = result.Velocity;
 		onFloor = result.OnFloor;
 
-		UpdateRaycast(false);
-
 		ultraFarLOD.GlobalPosition = ((GlobalPosition / 32f).Floor() * 32f) with {Y = 0f};
 		ultraFarLOD.GlobalRotation = Vector3.Zero;
 		((ShaderMaterial) ultraFarLOD.MaterialOverride).SetShaderParameter("offset", new Vector2(Util.smartPosOffsetX, Util.smartPosOffsetZ));
 		((ShaderMaterial) ultraFarLOD.MaterialOverride).SetShaderParameter("near_limit", (world.primaryRenderLODDistance - 6) * LOD.LOD_SIZE);
 		((ShaderMaterial) ultraFarLOD.MaterialOverride).SetShaderParameter("far_color", new Vector3(0.3f, 0.5f, 0.7f)); // TODO: Make this change with the day/night cycle
-	}
-
-
-	public void UpdateRaycast(bool forceUpdate)
-	{
-		raycast.TargetPosition = camera.Transform.Basis.Y * 4f;
-		if (forceUpdate)
-			raycast.ForceRaycastUpdate();
-		Vector3 pos = (raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * -0.01f).Floor() + new Vector3(0.5f, 0.5f, 0.5f);
-
-		((Node3D) raycast.GetNode("Node3D")).GlobalPosition = pos;
-		((Node3D) raycast.GetNode("Node3D")).Visible = raycast.IsColliding();
 	}
 
 
@@ -173,14 +168,14 @@ public partial class Player : Node3D
 					flightSpeed *= 0.9f;
 				} else if (buttonEvent.ButtonIndex == MouseButton.Left)
 				{
-					if (raycast.IsColliding())
-						world.SetBlock(Util.SmartPosToAbsPos(raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * -0.01f), 0);
-						UpdateRaycast(true);
+					float raycast = world.DoRaycastSmartPos(GetEyePos(), GetEyeLookVector(), 4f);
+					if (raycast != -1)
+						world.SetBlock(Util.SmartPosToAbsPos(GetEyePos() + GetEyeLookVector() * (raycast + 0.01f)), 0);
 				} else if (buttonEvent.ButtonIndex == MouseButton.Right)
 				{
-					if (raycast.IsColliding())
-						world.SetBlock(Util.SmartPosToAbsPos(raycast.GetCollisionPoint() + raycast.GetCollisionNormal() * 0.01f), 2);
-						UpdateRaycast(true);
+					float raycast = world.DoRaycastSmartPos(GetEyePos(), GetEyeLookVector(), 4f);
+					if (raycast != -1)
+						world.SetBlock(Util.SmartPosToAbsPos(GetEyePos() + GetEyeLookVector() * (raycast - 0.01f)), 2);
 				}
 			}
 		} else if (@event is InputEventKey keyEvent)
@@ -199,5 +194,17 @@ public partial class Player : Node3D
 				flying = !flying;
 			}
 		}
+	}
+
+
+	public Vector3 GetEyePos()
+	{
+		return Position with { Y = Position.Y + 1.5f };
+	}
+
+
+	public Vector3 GetEyeLookVector()
+	{
+		return -camera.GlobalTransform.Basis.Z;
 	}
 }

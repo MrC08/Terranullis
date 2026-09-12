@@ -44,6 +44,8 @@ subdivide_width = 64
 subdivide_depth = 64
 
 [node name="Player" type="Node3D" unique_id=944796299]
+process_priority = 1
+process_physics_priority = 1
 script = ExtResource("1_3vyb7")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=465437091]
@@ -54,18 +56,10 @@ shape = SubResource("CapsuleShape3D_sh265")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 mesh = SubResource("CapsuleMesh_sh265")
 
-[node name="RayCast3D" type="RayCast3D" parent="." unique_id=1266406676]
+[node name="BlockSelector" type="MeshInstance3D" parent="." unique_id=1467459983]
 transform = Transform3D(1, 0, 0, 0, -4.3711392e-08, 1.0000001, 0, -1.0000001, -4.3711392e-08, 0, 1.5, 0)
-target_position = Vector3(0, 0, -10)
-debug_shape_custom_color = Color(1, 1, 1, 1)
-debug_shape_thickness = 5
-
-[node name="Node3D" type="Node3D" parent="RayCast3D" unique_id=138277478]
-transform = Transform3D(1, 0, 0, 0, -4.3711392e-08, 1.0000001, 0, -1.0000001, -4.3711392e-08, 0, 1.5, 0)
-top_level = true
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="RayCast3D/Node3D" unique_id=1467459983]
 mesh = SubResource("BoxMesh_3vyb7")
+skeleton = NodePath("")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1323247333]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)

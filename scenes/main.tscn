@@ -97,6 +97,8 @@ fill_to = Vector2(0.5, 0)
 [node name="Node3D" type="Node3D" unique_id=74101674]
 
 [node name="World" type="Node3D" parent="." unique_id=1955693116]
+process_priority = -1
+process_physics_priority = -1
 script = ExtResource("1_sugp2")
 noiseArray = Array[Noise]([SubResource("FastNoiseLite_0wfyh"), SubResource("FastNoiseLite_sugp2"), SubResource("FastNoiseLite_jyhfs"), SubResource("FastNoiseLite_tbgi4")])
 

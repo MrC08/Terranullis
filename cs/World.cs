@@ -434,15 +434,14 @@ public partial class World : Node3D
 		return delta;
 	}
 
-	public Vector3 DoRaycastSmartPos(Vector3 position, Vector3 direction, float range) {
-		Vector3 hit = DoRaycastAbsPos(Util.SmartPosToAbsPos(position), direction, range);
-		return hit == Vector3.Zero ? Vector3.Zero : Util.AbsPosToSmartPos(hit);
+	public float DoRaycastSmartPos(Vector3 position, Vector3 direction, float range) {
+		return DoRaycastAbsPos(Util.SmartPosToAbsPos(position), direction, range);
 	}
 
 	// Voxel DDA (Amanatides-Woo) raycast: steps cell-by-cell along `direction` from
-	// `position`, returning the exact world-space surface point of the first
-	// collidable block within `range`, or Vector3.Zero if nothing is hit.
-	public Vector3 DoRaycastAbsPos(Vector3 position, Vector3 direction, float range) {
+	// `position`, returning the distance traveled before hitting the first
+	// collidable block within `range`, or -1 if nothing is hit.
+	public float DoRaycastAbsPos(Vector3 position, Vector3 direction, float range) {
 		direction = direction.Normalized();
 
 		Vector3I blockPos = new Vector3I(Mathf.FloorToInt(position.X), Mathf.FloorToInt(position.Y), Mathf.FloorToInt(position.Z));
@@ -469,7 +468,7 @@ public partial class World : Node3D
 
 		while (t <= range) {
 			if (CheckForCollisionAtPoint(blockPos.X, blockPos.Y, blockPos.Z))
-				return position + direction * t;
+				return t;
 
 			if (tMax.X < tMax.Y && tMax.X < tMax.Z) {
 				blockPos.X += step.X;
@@ -486,6 +485,6 @@ public partial class World : Node3D
 			}
 		}
 
-		return Vector3.Zero;
+		return -1f;
 	}
 }
