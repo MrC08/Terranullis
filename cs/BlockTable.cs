@@ -8,7 +8,7 @@ public static class BlockTable
 		new BlockType(1, "Grass").SetAllTextures(2, 3, 1, 1, 1, 1),
 		new BlockType(2, "Dirt").SetAllTextures(3),
 		new BlockType(3, "idk").SetAllTextures(0),
-		new BlockType(4, "Water").SetAllTextures(4).SetTransparency(true).SetCollidable(false)
+		new BlockType(4, "Water").SetAllTextures(4).SetTranslucent(true).SetCollidable(false)
 	};
 
 	public static BlockType Get(ulong block)

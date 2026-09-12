@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using Godot;
 
 public class MeshSpan<T>
@@ -16,6 +17,7 @@ public class MeshSpan<T>
 		arr = new T[length];
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 	public void Add(T element)
 	{
 		if (index >= length)
@@ -32,6 +34,7 @@ public class MeshSpan<T>
 		index++;
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 	public void AddQuadruplet(T element1, T element2, T element3, T element4)
 	{
 		if (index + 4 >= length)
@@ -51,6 +54,7 @@ public class MeshSpan<T>
 		index += 4;
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 	public void AddQuadruplet(T element)
 	{
 		if (index + 4 >= length)
@@ -70,6 +74,7 @@ public class MeshSpan<T>
 		index += 4;
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 	public void AddHextuplet(T element1, T element2, T element3, T element4, T element5, T element6)
 	{
 		if (index + 6 >= length)
@@ -91,6 +96,7 @@ public class MeshSpan<T>
 		index += 6;
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveOptimization)]
 	public Span<T> GetSpan()
 	{
 		return new Span<T>(arr).Slice(0, index);
